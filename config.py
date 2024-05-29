@@ -23,3 +23,10 @@ MAGIC_NINE_BTN='神奇九转'
 
 # ==== Welcome Page Configs ====
 WELCOME_MSG='欢迎使用 AMaretTool :)\n'
+
+# ==== Magic Nine Page Configs ====
+TABLE_WIDTH_STOCK_CODE=180
+TABLE_WIDTH_STOCK_NAME=250
+
+TABLE_STOCK_CODE='代码'
+TABLE_STOCK_NAME='名称'
