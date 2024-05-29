@@ -1,5 +1,5 @@
 import customtkinter
-from config import APP_NAME, APP_WIDTH, APP_HEIGHT, APP_MIN_WIDTH, APP_MIN_HEIGHT
+from config import APP_NAME, APP_WIDTH, APP_HEIGHT, APP_MIN_WIDTH, APP_MIN_HEIGHT, MAGIC_NINE_FRAME, WELCOME_FRAME
 from .magic_nine_view import MagicNineView
 from .welcome_view import WelcomeView
 from .menu_view import Menu
@@ -25,8 +25,8 @@ class View(customtkinter.CTk):
         self._add_menu()
         # this frames contains all views for the app
         self.frames: Frames = {}  # type: ignore
-        self._add_frame(MagicNineView, "magic_nine")
-        self._add_frame(WelcomeView, "welcome")
+        self._add_frame(MagicNineView, MAGIC_NINE_FRAME)
+        self._add_frame(WelcomeView, WELCOME_FRAME)
 
     def start_mainloop(self) -> None:
         self.mainloop()
@@ -40,3 +40,7 @@ class View(customtkinter.CTk):
         self.frames[name] = Frame(self)
         # add 
         self.frames[name].grid(row=1, column=0, sticky="nsew")
+        
+    def switch_frame(self, name: str) -> None:
+        frame = self.frames[name]
+        frame.tkraise()

@@ -14,6 +14,10 @@ APP_HEIGHT=750
 # Application Minimal Height
 APP_MIN_HEIGHT=600
 
+# Frames
+MAGIC_NINE_FRAME='magic_nine'
+WELCOME_FRAME='welcome'
+
 # ==== Menu Configs ====
 MAGIC_NINE_BTN='神奇九转'
 
