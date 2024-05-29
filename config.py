@@ -1,6 +1,6 @@
 # ==== Application Configs ====
 # Application Title
-APP_NAME="AMarketTool"
+APP_NAME="AMarktTool"
 
 # Application Width
 APP_WIDTH=2500
