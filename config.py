@@ -1,3 +1,4 @@
+# ==== Application Configs ====
 # Application Title
 APP_NAME="AMarketTool"
 
@@ -8,7 +9,10 @@ APP_WIDTH=2500
 APP_MIN_WIDTH=2000
 
 # Application Height
-APP_HEIGHT=1500
+APP_HEIGHT=750
 
 # Application Minimal Height
-APP_MIN_HEIGHT=1250
+APP_MIN_HEIGHT=600
+
+# ==== Home Page Configs ====
+MAGIC_NINE_BTN='神奇九转'
