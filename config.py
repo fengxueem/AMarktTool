@@ -14,5 +14,8 @@ APP_HEIGHT=750
 # Application Minimal Height
 APP_MIN_HEIGHT=600
 
-# ==== Home Page Configs ====
+# ==== Menu Configs ====
 MAGIC_NINE_BTN='神奇九转'
+
+# ==== Welcome Page Configs ====
+WELCOME_MSG='欢迎使用 AMaretTool :)\n'

@@ -1,6 +1,7 @@
 import customtkinter
 from config import APP_NAME, APP_WIDTH, APP_HEIGHT, APP_MIN_WIDTH, APP_MIN_HEIGHT
 from .magic_nine_view import MagicNineView
+from .welcome_view import WelcomeView
 from .menu_view import Menu
 
 from typing import TypedDict
@@ -25,6 +26,7 @@ class View(customtkinter.CTk):
         # this frames contains all views for the app
         self.frames: Frames = {}  # type: ignore
         self._add_frame(MagicNineView, "magic_nine")
+        self._add_frame(WelcomeView, "welcome")
 
     def start_mainloop(self) -> None:
         self.mainloop()
