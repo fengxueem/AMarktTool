@@ -51,7 +51,7 @@ class MagicNineModel:
                 count = 0
         # 倒序遍历数组
         for i in range(len(sum_array) - 1, -1, -1):
-            if sum_array[i] > magic_number:
+            if sum_array[i] >= magic_number:
                 return i  # 返回找到的下标
         return -1  # 如果没有找到，则返回-1
 
