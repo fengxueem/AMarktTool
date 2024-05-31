@@ -11,7 +11,7 @@ class MagicNineController:
         self.all_stocks = model.magic_nine_model.all_stocks
             
     def init_table(self)->None:
-        for stock in self.all_stocks:
-            values = (stock[TABLE_STOCK_CODE], stock[TABLE_STOCK_NAME])
+        for index, stock in enumerate(self.all_stocks):
+            values = (index + 1, stock[TABLE_STOCK_CODE], stock[TABLE_STOCK_NAME])
             self.frame.table.insert('', 'end', values = values)
         
