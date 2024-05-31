@@ -9,7 +9,7 @@ class Controller:
         self.view = view
         self.model = model
         self.magic_nine_controller = MagicNineController(view, model)
-        self.menu_controller = MenuController(view, model, self.magic_nine_controller)
+        self.menu_controller = MenuController(view, model)
 
     def start_app(self) -> None:
         # always start the app with the welcome page

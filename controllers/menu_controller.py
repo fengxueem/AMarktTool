@@ -1,14 +1,12 @@
 from config import MAGIC_NINE_FRAME
 from models import Model
-from .magic_nine_controller import MagicNineController
 from views import View
 
 
 class MenuController:
-    def __init__(self, view : View, model : Model, magic_nine_controller: MagicNineController) -> None:
+    def __init__(self, view : View, model : Model) -> None:
         self.view = view
         self.model = model
-        self.magic_nine_controller = magic_nine_controller
         self.frame = self.view.menu
         
         self._bind()
