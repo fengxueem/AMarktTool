@@ -65,11 +65,12 @@ class MagicNineModel:
             end_date=end_date_str,
             adjust="hfq"
             )
-        # 生成一个每日价格是否超过当日后第4天的布尔数组，用于判断神奇 X 转
+        # 生成一个每日价格是否超过当日后第 magic_number // 2 天的布尔数组，用于判断神奇 X 转
         daily_result = []
         magic_number = 9
         half_magic_num = magic_number // 2
-        for entry in range(0, stock_zh_a_hist_df.shape[0] - magic_number // 2):
+        # 边界条件：比较收盘价高低时，不用考虑最开始的 magic_number // 2 天
+        for entry in range(0, stock_zh_a_hist_df.shape[0] - half_magic_num):
             daily_result.append(
                 MagicNineModel.bigger_than_x_days_later(
                     dataframe_from_ak = stock_zh_a_hist_df,
@@ -81,7 +82,8 @@ class MagicNineModel:
         magic_turn_index = MagicNineModel.find_magic_number(daily_result, magic_number)
         # 如果存在则将其放入数据表格中
         if magic_turn_index > -1:
-            signal_date = stock_zh_a_hist_df.loc[magic_turn_index, AK_DATAFRAME_DATE]
+            # 由于我们在比较数据时，排除了前 magic_number // 2 天，因此这里的下标需要加上 magic_number // 2 天才是信号日期
+            signal_date = stock_zh_a_hist_df.loc[magic_turn_index + half_magic_num, AK_DATAFRAME_DATE]
             return (stock[TABLE_STOCK_CODE], stock[TABLE_STOCK_NAME], signal_date)
         return None
 
