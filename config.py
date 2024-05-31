@@ -22,7 +22,7 @@ WELCOME_FRAME='welcome'
 MAGIC_NINE_BTN='神奇九转'
 
 # ==== Welcome Page Configs ====
-WELCOME_MSG='欢迎使用 AMaretTool :)\n'
+WELCOME_MSG='欢迎使用 AMarktTool :)\n'
 
 # ==== Magic Nine Page Configs ====
 TABLE_WIDTH_INDEX=20 
