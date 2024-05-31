@@ -105,9 +105,11 @@ class MagicNineModel:
         self.pool.join()
         valid_magic_count = 0
         magic_stocks = []
+        # 挑选出所有不是None的有效结果
         for valid_magic_stock in valid_magic_list:
             res = valid_magic_stock.get()
             if res is not None:
+                # 为每个结果配上一个ID号
                 valid_magic_count += 1
                 magic_stocks.append((valid_magic_count,) + res)
         return magic_stocks
