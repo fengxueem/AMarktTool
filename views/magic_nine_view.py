@@ -1,4 +1,4 @@
-from customtkinter import CTkFrame
+from customtkinter import CTkFrame, CTkScrollbar
 import tkinter.ttk as ttk
 from config import TABLE_WIDTH_STOCK_CODE, TABLE_WIDTH_STOCK_NAME
 from config import TABLE_STOCK_CODE, TABLE_STOCK_NAME
@@ -22,7 +22,7 @@ class MagicNineView(CTkFrame):
         self.table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
         
         # 创建垂直滚动条
-        self.scrollbar = ttk.Scrollbar(self, orient="vertical")
+        self.scrollbar = CTkScrollbar(self)
         self.scrollbar.grid(row=0, column=1, sticky='nsw')
         
         # 关联滚动条和表格
