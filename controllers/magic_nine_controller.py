@@ -38,6 +38,12 @@ class MagicNineController:
         # 下一次点击表头时，使用相反的顺序排序
         table.heading(col, command=lambda: MagicNineController.table_sort_signal_date(table, col, not is_reverse_order))
     
+    def show_stock_detail(self, event):
+        magic_nine_table = self.frame.table
+        item_id = magic_nine_table.focus()
+        item_text = magic_nine_table.item(item_id)["values"]
+        self.view.open_stock_detail_window(item_text[1])
+    
     def __init__(self, view : View, model : Model) -> None:
         self.view = view
         self.model = model
@@ -45,12 +51,15 @@ class MagicNineController:
         # 自定义表格每列排序方法
         columns = {
             TABLE_INDEX : [MagicNineController.table_sort_index],
-            TABLE_STOCK_CODE : [MagicNineController.table_sort_stock_code], 
+            TABLE_STOCK_CODE : [MagicNineController.table_sort_stock_code],
             TABLE_SIGNAL_DATE : [MagicNineController.table_sort_signal_date]
         }
+        magic_nine_table = self.frame.table
         for c in columns:
             sort_func = columns[c][0]
-            self.frame.table.heading(c, command=lambda _col=c: sort_func(self.frame.table, _col, False))      
+            magic_nine_table.heading(c, command=lambda _col=c: sort_func(magic_nine_table, _col, False))
+        # 将show_details函数绑定到Treeview部件的点击事件上
+        magic_nine_table.bind("<<TreeviewSelect>>", self.show_stock_detail)
         # start calculating magic nine as soon as the app started
         t = threading.Thread(target=self.init_table, args=())
         t.start()
@@ -63,4 +72,4 @@ class MagicNineController:
             self.frame.table.insert('', 'end', values = stock)
         self.view.menu.magic_nine_button.configure(state='normal')
         self.view.menu.magic_nine_button.configure(text=MAGIC_NINE_BTN)
-        
+

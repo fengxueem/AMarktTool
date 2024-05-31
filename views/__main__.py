@@ -44,3 +44,17 @@ class View(customtkinter.CTk):
     def switch_frame(self, name: str) -> None:
         frame = self.frames[name]
         frame.tkraise()
+        
+    def open_stock_detail_window(self, stock_code_str):
+        new_window = customtkinter.CTkToplevel(self, fg_color="white")
+        new_window.title(f'details of {stock_code_str}')
+        new_window.geometry("400x200")
+        new_window.resizable(False, True) # Width, Height
+
+        def close():
+            new_window.destroy()
+            new_window.update()
+
+        # Close the window
+        new_button = customtkinter.CTkButton(new_window, text="Close Window", command=close)
+        new_button.pack(pady=40)
