@@ -1,8 +1,8 @@
 from config import MAGIC_NINE_FRAME
-
-from views import View
 from models import Model
 from .magic_nine_controller import MagicNineController
+from views import View
+
 
 class MenuController:
     def __init__(self, view : View, model : Model, magic_nine_controller: MagicNineController) -> None:

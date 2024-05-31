@@ -1,8 +1,8 @@
 from config import WELCOME_FRAME
-from views import View
 from models import Model
-from .menu_controller import MenuController
 from .magic_nine_controller import MagicNineController
+from .menu_controller import MenuController
+from views import View
 
 class Controller:
     def __init__(self, view: View, model: Model):

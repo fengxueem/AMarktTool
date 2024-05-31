@@ -1,7 +1,8 @@
-from customtkinter import CTkFrame, CTkScrollbar
-import tkinter.ttk as ttk
 from config import TABLE_INDEX, TABLE_STOCK_CODE, TABLE_STOCK_NAME, TABLE_SIGNAL_DATE
 from config import TABLE_WIDTH_INDEX, TABLE_WIDTH_STOCK_CODE, TABLE_WIDTH_STOCK_NAME, TABLE_WIDTH_SIGNAL_DATE
+
+from customtkinter import CTkFrame, CTkScrollbar
+import tkinter.ttk as ttk
 
 class MagicNineView(CTkFrame):
     

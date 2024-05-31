@@ -1,9 +1,9 @@
-import customtkinter
 from config import APP_NAME, APP_WIDTH, APP_HEIGHT, APP_MIN_WIDTH, APP_MIN_HEIGHT, MAGIC_NINE_FRAME, WELCOME_FRAME
 from .magic_nine_view import MagicNineView
-from .welcome_view import WelcomeView
 from .menu_view import Menu
+from .welcome_view import WelcomeView
 
+import customtkinter
 from typing import TypedDict
 
 # a Dict class to help store all kinds of views

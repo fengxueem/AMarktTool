@@ -1,7 +1,6 @@
 from config import MAGIC_NINE_FRAME
-
-from views import View
 from models import Model
+from views import View
 
 class MagicNineController:
     

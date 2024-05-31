@@ -1,9 +1,9 @@
+from config import TABLE_STOCK_CODE, TABLE_STOCK_NAME
+from config import AK_DATE_FORMAT, AK_DATAFRAME_DATE, AK_DATAFRAME_CLOSING_PRICE
+
 import akshare as ak
 from datetime import datetime, timedelta
 from multiprocessing import Pool
-
-from config import TABLE_STOCK_CODE, TABLE_STOCK_NAME
-from config import AK_DATE_FORMAT, AK_DATAFRAME_DATE, AK_DATAFRAME_CLOSING_PRICE
 
 class MagicNineModel:
     

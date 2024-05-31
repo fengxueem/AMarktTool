@@ -1,6 +1,6 @@
-from customtkinter import CTkFrame, CTkLabel, CTkFont
-
 from config import WELCOME_MSG
+
+from customtkinter import CTkFrame, CTkLabel, CTkFont
 
 class WelcomeView(CTkFrame):
     def __init__(self, *arg, **kwargs):

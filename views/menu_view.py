@@ -1,6 +1,6 @@
-from customtkinter import CTkFrame, CTkButton
-
 from config import MAGIC_NINE_BTN
+
+from customtkinter import CTkFrame, CTkButton
 
 class Menu(CTkFrame):
     def __init__(self, master):
