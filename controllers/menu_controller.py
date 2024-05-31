@@ -18,4 +18,3 @@ class MenuController:
     
     def magic_nine_btn(self) -> None:
         self.view.switch_frame(MAGIC_NINE_FRAME)
-        self.magic_nine_controller.init_table()

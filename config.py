@@ -20,6 +20,7 @@ WELCOME_FRAME='welcome'
 
 # ==== Menu Configs ====
 MAGIC_NINE_BTN='神奇九转'
+MAGIC_NINE_BTN_DISABLED='神奇九转加载中...'
 
 # ==== Welcome Page Configs ====
 WELCOME_MSG='欢迎使用 AMarktTool :)\n'
