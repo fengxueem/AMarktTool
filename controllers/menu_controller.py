@@ -2,8 +2,9 @@ from config import MAGIC_NINE_FRAME
 from models import Model
 from views import View
 
+from .__base__ import BaseController
 
-class MenuController:
+class MenuController(BaseController):
     def __init__(self, view : View, model : Model) -> None:
         self.view = view
         self.model = model

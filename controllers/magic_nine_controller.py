@@ -5,8 +5,9 @@ from models import Model
 from views import View
 
 import threading
+from .__base__ import BaseController
 
-class MagicNineController:
+class MagicNineController(BaseController):
     
     @staticmethod
     def table_sort_index(table, col, is_reverse_order):
@@ -42,7 +43,7 @@ class MagicNineController:
         magic_nine_table = self.frame.table
         item_id = magic_nine_table.focus()
         item_text = magic_nine_table.item(item_id)["values"]
-        self.view.open_stock_detail_window(item_text[1])
+        self.mediator.notify(self, "OPEN_STOCK_DETAIL_WINDOWS", str(item_text[1]))
     
     def __init__(self, view : View, model : Model) -> None:
         self.view = view
