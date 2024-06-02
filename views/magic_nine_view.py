@@ -2,6 +2,7 @@ from config import TABLE_INDEX, TABLE_STOCK_CODE, TABLE_STOCK_NAME, TABLE_SIGNAL
 from config import TABLE_WIDTH_INDEX, TABLE_WIDTH_STOCK_CODE, TABLE_WIDTH_STOCK_NAME, TABLE_WIDTH_SIGNAL_DATE
 
 from customtkinter import CTkFrame, CTkScrollbar
+import customtkinter as ctk
 import tkinter.ttk as ttk
 
 class MagicNineView(CTkFrame):    
@@ -9,7 +10,7 @@ class MagicNineView(CTkFrame):
         super().__init__(*arg, **kwargs)
 
         # 创建垂直滚动条
-        self.scrollbar = CTkScrollbar(master = self, orientation= 'vertical')
+        self.scrollbar = CTkScrollbar(master = self, orientation=ctk.VERTICAL)
         
         # 创建表格
         self.table = ttk.Treeview(
@@ -30,13 +31,13 @@ class MagicNineView(CTkFrame):
             # 设置表头文字
             self.table.heading(c, text = c)
             # 设置当前列宽度与其他格式
-            self.table.column(c, minwidth = columns[c][0], anchor='center')
+            self.table.column(c, minwidth = columns[c][0], anchor=ctk.CENTER)
         
         # 关联滚动条 -> 表格 
         self.scrollbar.configure(command=self.table.yview)
         # 设置滚动条和表格的布局
         # 先放置滚动条
-        self.scrollbar.pack(side='right', fill='y')
+        self.scrollbar.pack(side=ctk.RIGHT, fill=ctk.Y)
         # 再让表格填充剩下区域
-        self.table.pack(fill='both', expand=True)
+        self.table.pack(fill=ctk.BOTH, expand=True)
     

@@ -5,7 +5,7 @@ from config import EVENT_OPEN_STOCK_DETAIL, EVENT_HIDE_STOCK_DETAIL
 from models import Model
 from .magic_nine_controller import MagicNineController
 from .menu_controller import MenuController
-from .stock_detail_controller import StockDetailController
+from .stock_detail_window_controller import StockDetailWindowController
 from views import View
 
 class Controller(Mediator):
@@ -34,14 +34,14 @@ class Controller(Mediator):
         elif event == EVENT_HIDE_STOCK_DETAIL:
             self.view.hide_window(msg)
 
-    def add_windows_controller(self, controller_type: str, name: str) -> None:
+    def add_windows_controller(self, type: str, name: str) -> None:
         # convert type string to class type
-        ControllerClass = None
-        if controller_type == STOCK_DETAIL_CONTROLLER:
-            ControllerClass = StockDetailController
+        WindowControllerClass = None
+        if type == STOCK_DETAIL_CONTROLLER:
+            WindowControllerClass = StockDetailWindowController
             
-        controller_key = controller_type + name
-        if controller_key not in self.window_controllers:       
+        key = type + name
+        if key not in self.window_controllers:       
             # create a controller instance if not existed
-            self.window_controllers[controller_key] = ControllerClass(self.view, self.model, controller_key)
-            self.window_controllers[controller_key].mediator = self
+            self.window_controllers[key] = WindowControllerClass(self.view, self.model, key)
+            self.window_controllers[key].mediator = self

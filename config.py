@@ -3,7 +3,7 @@
 APP_NAME="AMarktTool"
 
 # Application Width
-APP_WIDTH=600
+APP_WIDTH=1000
 
 # Application Minimal Width
 APP_MIN_WIDTH=600
@@ -47,3 +47,11 @@ TABLE_SIGNAL_DATE='信号日期'
 AK_DATE_FORMAT="%Y%m%d"
 AK_DATAFRAME_DATE='日期'
 AK_DATAFRAME_CLOSING_PRICE='收盘'
+
+# ==== Stock Detail Window Configs ====
+# Window Width and Height
+STOCK_DETAIL_WINDOW_WIDTH=1500
+STOCK_DETAIL_WINDOW_HEIGHT=800
+
+# Frames
+STOCK_DETAIL_FRAME='stock_detail'
