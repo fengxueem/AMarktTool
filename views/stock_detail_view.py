@@ -26,17 +26,9 @@ class StockDetailView(CTkFrame):
         self.annot.set_visible(False)
         
         # 将图表嵌入到 customtkinter 窗口中
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
-        self.canvas_widget = self.canvas.get_tk_widget()
-        self.canvas_widget.pack(fill=ctk.BOTH, expand=True)
-        
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)        
         # 添加 matplotlib 导航工具栏
         self.toolbar = NavigationToolbar2Tk(self.canvas, self)
         self.toolbar.update()
-        self.canvas._tkcanvas.pack(fill=ctk.BOTH, expand=True)
-
-        # # 开启交互模式
-        plt.ion()
-        
-        
+        self.canvas._tkcanvas.pack(fill=ctk.BOTH, expand=True)        
     
