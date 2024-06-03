@@ -14,6 +14,7 @@ class StockDetailWindow(CTkToplevel):
         super().__init__(master)
         
         self.geometry(f"{STOCK_DETAIL_WINDOW_WIDTH}x{STOCK_DETAIL_WINDOW_HEIGHT}")
+        # let child frames use the whole window space
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         
@@ -24,5 +25,4 @@ class StockDetailWindow(CTkToplevel):
     def _add_frame(self, Frame, name: str) -> None:
         # create a Frame instance
         self.frames[name] = Frame(self)
-        # add 
         self.frames[name].grid(row=0, column=0, sticky="nsew")
