@@ -15,6 +15,8 @@ class StockDetailView(CTkFrame):
         
         # 创建 matplotlib 图表
         self.fig = Figure()
+        # 调整绘图的面积，尽可能充满整个窗口
+        self.fig.subplots_adjust(left=0.025, right=0.975, bottom=0.03, top=0.99)
         self.ax = self.fig.add_subplot(111)
         self.ax.xaxis_date()
         self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))

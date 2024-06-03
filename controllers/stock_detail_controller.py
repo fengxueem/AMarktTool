@@ -54,7 +54,7 @@ class StockDetailController(BaseController):
             if event.key == 'control':
                 # 按下 Ctrl 键则代表放大或缩小
                 cur_xlim = self.frame.ax.get_xlim()
-                cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.5)
+                cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.3)
                 xdata = event.xdata
                 if event.button == 'up':
                     scale_factor = 1 / base_scale
@@ -126,7 +126,7 @@ class StockDetailController(BaseController):
         self.frame.ax.clear()
 
         # 绘制新的 K 线图
-        candlestick_ohlc(self.frame.ax, self.quotes, width=0.6, colorup='g', colordown='r', alpha=0.8)
+        candlestick_ohlc(self.frame.ax, self.quotes, width=0.6, colorup='r', colordown='g', alpha=0.8)
         self.frame.ax.xaxis_date()
         self.frame.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         self.frame.ax.grid(True)

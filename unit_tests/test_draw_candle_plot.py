@@ -183,11 +183,10 @@ def refresh_data():
     ax.clear()
 
     # 绘制新的 K 线图
-    candlestick_ohlc(ax, quotes, width=0.6, colorup='g', colordown='r', alpha=0.8)
+    candlestick_ohlc(ax, quotes, width=0.6, colorup='r', colordown='g', alpha=0.8)
     ax.xaxis_date()
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     ax.grid(True)
-
     # 重绘图表
     canvas.draw_idle()
     # 重绘注释文本
@@ -198,6 +197,6 @@ def refresh_data():
 
 refresh_button = ctk.CTkButton(app, text="刷新", command=refresh_data)
 refresh_button.pack(pady=20)
-
+fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)
 # 运行应用
 app.mainloop()
