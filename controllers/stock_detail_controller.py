@@ -12,11 +12,11 @@ import pandas as pd
 import numpy as np
 
 class StockDetailController(BaseController):
-    def __init__(self, view : StockDetailWindow, model : Model) -> None:
+    def __init__(self, view : StockDetailWindow, model : Model, stock_code : str) -> None:
         self.view = view
         self.model = model
         self.frame = self.view.frames[STOCK_DETAIL_FRAME]
-        
+        self.stock_code = stock_code
         # 存放股票历史数据
         self.quotes = []
 
@@ -78,7 +78,7 @@ class StockDetailController(BaseController):
         end_date = datetime.now().strftime('%Y%m%d')
 
         # 使用akshare获取股票数据
-        stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol="600519", period="daily", start_date=start_date, end_date=end_date, adjust="qfq")
+        stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date, end_date=end_date, adjust="qfq")
 
         # 准备数据格式
         stock_zh_a_hist_df['日期'] = pd.to_datetime(stock_zh_a_hist_df['日期'])

@@ -1,6 +1,6 @@
 from .__base__ import Mediator
 from config import WELCOME_FRAME
-from config import STOCK_DETAIL_WINDOW, STOCK_DETAIL_CONTROLLER
+from config import STOCK_DETAIL_WINDOW, STOCK_DETAIL_CONTROLLER, STOCK_DETAIL_MODEL
 from config import EVENT_OPEN_STOCK_DETAIL, EVENT_HIDE_STOCK_DETAIL
 from models import Model
 from .magic_nine_controller import MagicNineController
@@ -30,6 +30,7 @@ class Controller(Mediator):
     def notify(self, sender: object, event: str, msg: str) -> None:
         if sender is self.magic_nine_controller and event == EVENT_OPEN_STOCK_DETAIL:
             self.view.add_window(STOCK_DETAIL_WINDOW, msg)
+            self.model.add_model(STOCK_DETAIL_MODEL, msg)
             self.add_windows_controller(STOCK_DETAIL_CONTROLLER, msg)
         elif event == EVENT_HIDE_STOCK_DETAIL:
             self.view.hide_window(msg)
