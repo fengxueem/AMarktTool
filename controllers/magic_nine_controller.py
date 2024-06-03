@@ -43,7 +43,8 @@ class MagicNineController(BaseController):
         magic_nine_table = self.frame.table
         item_id = magic_nine_table.focus()
         item_text = magic_nine_table.item(item_id)["values"]
-        self.mediator.notify(self, "OPEN_STOCK_DETAIL_WINDOWS", str(item_text[1]))
+        stock_code = str(item_text[1]).zfill(6)
+        self.mediator.notify(self, "OPEN_STOCK_DETAIL_WINDOWS", stock_code)
     
     def __init__(self, view : View, model : Model) -> None:
         self.view = view
