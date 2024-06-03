@@ -1,18 +1,15 @@
 from config import STOCK_DETAIL_FRAME
-from models import Model
+from models.stock_detail_model import StockDetailModel
 from views.stock_detail_window import StockDetailWindow
 
 from .__base__ import BaseController
 
-import akshare as ak
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 from mplfinance.original_flavor import candlestick_ohlc
-import pandas as pd
-import numpy as np
 
 class StockDetailController(BaseController):
-    def __init__(self, view : StockDetailWindow, model : Model, stock_code : str) -> None:
+    def __init__(self, view : StockDetailWindow, model : StockDetailModel, stock_code : str) -> None:
         self.view = view
         self.model = model
         self.frame = self.view.frames[STOCK_DETAIL_FRAME]
@@ -25,6 +22,8 @@ class StockDetailController(BaseController):
         self.frame.fig.canvas.mpl_connect('scroll_event', self.zoom)
         # 连接按钮的刷新数据事件
         self.frame.refresh_button.configure(command = self.refresh_data)
+        # 窗口开启后默认绘制一次
+        self.refresh_data()
         
     # 更新注释文本的内容和位置
     def update_annot(self, ohlc, x, y):
@@ -76,20 +75,13 @@ class StockDetailController(BaseController):
         # 获取股票价格开始和结束时间
         start_date = (datetime.now() - timedelta(days=365)).strftime('%Y%m%d')
         end_date = datetime.now().strftime('%Y%m%d')
-
-        # 使用akshare获取股票数据
-        stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date, end_date=end_date, adjust="qfq")
-
-        # 准备数据格式
-        stock_zh_a_hist_df['日期'] = pd.to_datetime(stock_zh_a_hist_df['日期'])
-        stock_zh_a_hist_df['日期'] = mdates.date2num(np.array(stock_zh_a_hist_df['日期'].dt.to_pydatetime()))
-        quotes = stock_zh_a_hist_df[['日期', '开盘', '最高', '最低', '收盘']].values
+        self.quotes = self.model.get_stock_quotes(start_date, end_date)
 
         # 清除旧的图表
         self.frame.ax.clear()
 
         # 绘制新的 K 线图
-        candlestick_ohlc(self.frame.ax, quotes, width=0.6, colorup='g', colordown='r', alpha=0.8)
+        candlestick_ohlc(self.frame.ax, self.quotes, width=0.6, colorup='g', colordown='r', alpha=0.8)
         self.frame.ax.xaxis_date()
         self.frame.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         self.frame.ax.grid(True)
