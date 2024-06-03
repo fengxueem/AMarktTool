@@ -68,28 +68,86 @@ def hover(event):
         annot.set_visible(False)
         canvas.draw_idle()
 
+# 查找指定时间范围内的最大和最小股价
+def find_price_range(quotes, start_time, end_time):
+    # 筛选出在指定时间范围内的股价数据
+    visible_quotes = [q for q in quotes if start_time <= q[0] <= end_time]
+    # 初始化最高价和最低价
+    high_max = -np.inf
+    low_min = np.inf
+    # 遍历筛选出的数据，更新最高价和最低价
+    for q in visible_quotes:
+        high_max = max(high_max, q[2])
+        low_min = min(low_min, q[3])
+    return low_min, high_max
+
 # 缩放事件处理函数
 def zoom(event):
     base_scale = 1.1
     if event.button == 'up' or event.button == 'down':
-        if event.key == 'control':  # 检查是否按下 Ctrl 键
+        if event.key == 'control':
+            # 按下 Ctrl 键则代表放大或缩小
             cur_xlim = ax.get_xlim()
-            cur_ylim = ax.get_ylim()
-            cur_xrange = (cur_xlim[1] - cur_xlim[0]) * 0.5
-            cur_yrange = (cur_ylim[1] - cur_ylim[0]) * 0.5
+            cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.5)
             xdata = event.xdata
-            ydata = event.ydata
             if event.button == 'up':
                 scale_factor = 1 / base_scale
             elif event.button == 'down':
                 scale_factor = base_scale
-            else:
-                scale_factor = 1
-            ax.set_xlim([xdata - cur_xrange * scale_factor,
-                         xdata + cur_xrange * scale_factor])
-            ax.set_ylim([ydata - cur_yrange * scale_factor,
-                         ydata + cur_yrange * scale_factor])
-            canvas.draw_idle()
+            # 计算移动步长
+            step = cur_xrange * scale_factor
+            # 保证移动后不超过股价日期的上下界限
+            new_low = max(xdata - step, quotes[0][0])
+            new_high = min(xdata + step, quotes[-1][0])
+            # 如果缩放到达边界，即某一侧到极限不能再放大或缩小，则另一侧需要弥补放大或缩小的损失。
+            if new_low == quotes[0][0]:
+                if event.button == 'up':
+                    new_high = cur_xlim[1] - step
+                elif event.button == 'down':
+                    new_high = cur_xlim[1] + step
+                # 同样确保其不超过 quotes 范围
+                new_high = min(new_high, quotes[-1][0])
+            if new_high == quotes[-1][0]:
+                if event.button == 'up':
+                    new_low = cur_xlim[0] + step
+                elif event.button == 'down':
+                    new_low = cur_xlim[0] - step
+                # 同样确保其不超过 quotes 范围
+                new_low = max(new_low, quotes[0][0])
+            # 这是新的x轴范围
+            new_xlim = [new_low, new_high]
+            ax.set_xlim(new_xlim)
+
+            # 根据新的x轴范围计算y轴的最大最小值
+            low_min, high_max = find_price_range(quotes, new_xlim[0], new_xlim[1])
+            ax.set_ylim([low_min, high_max])
+        else: 
+            # 平移操作
+            cur_xlim = ax.get_xlim()
+            # 平移到达左右两边后不能继续平移
+            if event.button == 'up' and cur_xlim[1] == quotes[-1][0]:
+                return
+            if event.button == 'down' and cur_xlim[0] == quotes[0][0]:
+                return
+            cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.02)
+            # 计算移动步长
+            if event.button == 'up':
+                scale_factor = base_scale
+            elif event.button == 'down':
+                scale_factor = -base_scale
+            step = cur_xrange * scale_factor
+            # 保证平移后不超过股价日期的上下界限
+            new_low = max(cur_xlim[0] + step, quotes[0][0])
+            new_high = min(cur_xlim[1] + step, quotes[-1][0])
+            # 这是新的x轴范围
+            new_xlim = [new_low, new_high]
+            ax.set_xlim(new_xlim)
+
+            # 根据新的x轴范围计算y轴的最大最小值
+            low_min, high_max = find_price_range(quotes, new_xlim[0], new_xlim[1])
+            ax.set_ylim([low_min, high_max])
+            
+        canvas.draw_idle()
 
 # 连接事件处理函数
 canvas.mpl_connect("motion_notify_event", hover)
