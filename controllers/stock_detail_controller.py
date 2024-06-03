@@ -37,7 +37,7 @@ class StockDetailController(BaseController):
     def hover(self, event):
         vis = self.frame.annot.get_visible()
         if event.inaxes == self.frame.ax:
-            for i, bar in enumerate(self.quotes):
+            for _, bar in enumerate(self.quotes):
                 if bar[0] - 0.3 <= event.xdata <= bar[0] + 0.3:
                     self.update_annot(bar, event.xdata, event.ydata)
                     self.frame.annot.set_visible(True)
@@ -88,3 +88,8 @@ class StockDetailController(BaseController):
 
         # 重绘图表
         self.frame.canvas.draw_idle()
+        # 重新初始化注释
+        self.frame.annot = self.frame.ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
+                            bbox=dict(boxstyle='round', fc="w"),
+                            arrowprops=dict(arrowstyle="->"))
+        self.frame.annot.set_visible(False)
