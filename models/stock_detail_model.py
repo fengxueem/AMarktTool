@@ -7,15 +7,31 @@ class StockDetailModel:
     def __init__(self, key : str) -> None:
         self.key = key
         self.stock_code = self._extract_stock_code()
+        self.quotes = []
     
+    # 从 key 中提取股票代码
     def _extract_stock_code(self):
         return self.key[-6:]
     
+    # 查找指定时间范围内的最大和最小股价
+    def find_price_range(self, start_time, end_time):
+        # 筛选出在指定时间范围内的股价数据
+        visible_quotes = [q for q in self.quotes if start_time <= q[0] <= end_time]
+        # 初始化最高价和最低价
+        high_max = -np.inf
+        low_min = np.inf
+        # 遍历筛选出的数据，更新最高价和最低价
+        for q in visible_quotes:
+            high_max = max(high_max, q[2])
+            low_min = min(low_min, q[3])
+        return low_min, high_max
+    
+    # 使用akshare获取股票数据
     def get_stock_quotes(self, start_date, end_date):
-        # 使用akshare获取股票数据
         stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date, end_date=end_date, adjust="qfq")
 
         # 准备数据格式
         stock_zh_a_hist_df['日期'] = pd.to_datetime(stock_zh_a_hist_df['日期'])
         stock_zh_a_hist_df['日期'] = mdates.date2num(np.array(stock_zh_a_hist_df['日期'].dt.to_pydatetime()))
-        return stock_zh_a_hist_df[['日期', '开盘', '最高', '最低', '收盘']].values
+        self.quotes = stock_zh_a_hist_df[['日期', '开盘', '最高', '最低', '收盘']].values
+        return self.quotes

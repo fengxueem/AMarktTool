@@ -18,8 +18,8 @@ class StockDetailController(BaseController):
         self.quotes = []
 
         # 连接鼠标悬浮事件和滚轮放大事件处理函数
-        self.frame.fig.canvas.mpl_connect("motion_notify_event", self.hover)
-        self.frame.fig.canvas.mpl_connect('scroll_event', self.zoom)
+        self.frame.canvas.mpl_connect("motion_notify_event", self.hover)
+        self.frame.canvas.mpl_connect('scroll_event', self.zoom_and_pan)
         # 连接按钮的刷新数据事件
         self.frame.refresh_button.configure(command = self.refresh_data)
         # 窗口开启后默认绘制一次
@@ -47,28 +47,73 @@ class StockDetailController(BaseController):
             self.frame.annot.set_visible(False)
             self.frame.fig.canvas.draw_idle()
 
-    # 缩放事件处理函数
-    def zoom(self, event):
+    # 缩放与平移事件处理函数
+    def zoom_and_pan(self, event):
         base_scale = 1.1
         if event.button == 'up' or event.button == 'down':
-            if event.key == 'control':  # 检查是否按下 Ctrl 键
+            if event.key == 'control':
+                # 按下 Ctrl 键则代表放大或缩小
                 cur_xlim = self.frame.ax.get_xlim()
-                cur_ylim = self.frame.ax.get_ylim()
-                cur_xrange = (cur_xlim[1] - cur_xlim[0]) * 0.5
-                cur_yrange = (cur_ylim[1] - cur_ylim[0]) * 0.5
+                cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.5)
                 xdata = event.xdata
-                ydata = event.ydata
                 if event.button == 'up':
                     scale_factor = 1 / base_scale
                 elif event.button == 'down':
                     scale_factor = base_scale
-                else:
-                    scale_factor = 1
-                self.frame.ax.set_xlim([xdata - cur_xrange * scale_factor,
-                            xdata + cur_xrange * scale_factor])
-                self.frame.ax.set_ylim([ydata - cur_yrange * scale_factor,
-                            ydata + cur_yrange * scale_factor])
-                self.frame.fig.canvas.draw_idle()
+                # 计算移动步长
+                step = cur_xrange * scale_factor
+                # 保证移动后不超过股价日期的上下界限
+                new_low = max(xdata - step, self.model.quotes[0][0])
+                new_high = min(xdata + step, self.model.quotes[-1][0])
+                # 如果缩放到达边界，即某一侧到极限不能再放大或缩小，则另一侧需要弥补放大或缩小的损失。
+                if new_low == self.model.quotes[0][0]:
+                    if event.button == 'up':
+                        new_high = cur_xlim[1] - step
+                    elif event.button == 'down':
+                        new_high = cur_xlim[1] + step
+                    # 同样确保其不超过 quotes 范围
+                    new_high = min(new_high, self.model.quotes[-1][0])
+                if new_high == self.model.quotes[-1][0]:
+                    if event.button == 'up':
+                        new_low = cur_xlim[0] + step
+                    elif event.button == 'down':
+                        new_low = cur_xlim[0] - step
+                    # 同样确保其不超过 quotes 范围
+                    new_low = max(new_low, self.model.quotes[0][0])
+                # 这是新的x轴范围
+                new_xlim = [new_low, new_high]
+                self.frame.ax.set_xlim(new_xlim)
+
+                # 根据新的x轴范围计算y轴的最大最小值
+                low_min, high_max = self.model.find_price_range(new_xlim[0], new_xlim[1])
+                self.frame.ax.set_ylim([low_min, high_max])
+            else: 
+                # 平移操作
+                cur_xlim = self.frame.ax.get_xlim()
+                # 平移到达左右两边后不能继续平移
+                if event.button == 'up' and cur_xlim[1] == self.model.quotes[-1][0]:
+                    return
+                if event.button == 'down' and cur_xlim[0] == self.model.quotes[0][0]:
+                    return
+                cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.02)
+                # 计算移动步长
+                if event.button == 'up':
+                    scale_factor = base_scale
+                elif event.button == 'down':
+                    scale_factor = -base_scale
+                step = cur_xrange * scale_factor
+                # 保证平移后不超过股价日期的上下界限
+                new_low = max(cur_xlim[0] + step, self.model.quotes[0][0])
+                new_high = min(cur_xlim[1] + step, self.model.quotes[-1][0])
+                # 这是新的x轴范围
+                new_xlim = [new_low, new_high]
+                self.frame.ax.set_xlim(new_xlim)
+
+                # 根据新的x轴范围计算y轴的最大最小值
+                low_min, high_max = self.model.find_price_range(new_xlim[0], new_xlim[1])
+                self.frame.ax.set_ylim([low_min, high_max])
+                
+            self.frame.canvas.draw_idle()
 
      # 刷新数据并重新绘制图表的函数
     def refresh_data(self):
