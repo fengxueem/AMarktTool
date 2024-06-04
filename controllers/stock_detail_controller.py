@@ -118,8 +118,17 @@ class StockDetailController(BaseController):
      # 刷新数据并重新绘制图表的函数
     def refresh_data(self):
         # 获取股票价格开始和结束时间
-        start_date = (datetime.now() - timedelta(days=365)).strftime('%Y%m%d')
-        end_date = datetime.now().strftime('%Y%m%d')
+        start_date = self.frame.start_date_frame.date_entry.get()
+        if not start_date:
+            start_date = (datetime.now() - timedelta(days=365)).strftime('%Y%m%d')
+        else:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').strftime('%Y%m%d')
+
+        end_date = self.frame.end_date_frame.date_entry.get()
+        if not end_date:
+            end_date = datetime.now().strftime('%Y%m%d')
+        else:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').strftime('%Y%m%d')
         self.quotes = self.model.get_stock_quotes(start_date, end_date)
 
         # 清除旧的图表
