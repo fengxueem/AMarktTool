@@ -62,7 +62,7 @@ def update_annot(ohlc, x, y):
 # 鼠标悬停事件处理函数
 def hover(event):
     is_annot_vis = annot.get_visible()
-    is_lines_vis = annot.get_visible()
+    is_lines_vis = vertical_line.get_visible()
     if event.inaxes == ax:
         # 绘制虚线
         horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
