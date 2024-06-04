@@ -49,3 +49,7 @@ class StockDetailView(CTkFrame):
                             bbox=dict(boxstyle=ctk.ROUND, fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         self.annot.set_visible(False)
+        
+        # 添加水平虚线和垂直虚线
+        self.horizontal_line = self.ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, visible=False)
+        self.vertical_line = self.ax.axvline(x=0, color='gray', linestyle='--', linewidth=1, visible=False)

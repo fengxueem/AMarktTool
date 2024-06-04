@@ -35,16 +35,30 @@ class StockDetailController(BaseController):
 
     # 鼠标悬停事件处理函数
     def hover(self, event):
-        vis = self.frame.annot.get_visible()
+        is_annot_vis = self.frame.annot.get_visible()
+        is_lines_vis = self.frame.horizontal_line.get_visible()
         if event.inaxes == self.frame.ax:
+            # 绘制虚线
+            self.frame.horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
+            self.frame.vertical_line.set_xdata([event.xdata, event.xdata])  # 注意这里将 xdata 包装成列表
+            self.frame.horizontal_line.set_visible(True)
+            self.frame.vertical_line.set_visible(True)
+            self.frame.fig.canvas.draw_idle()
+            # 绘制注释
             for _, bar in enumerate(self.quotes):
                 if bar[0] - 0.3 <= event.xdata <= bar[0] + 0.3:
                     self.update_annot(bar, event.xdata, event.ydata)
                     self.frame.annot.set_visible(True)
                     self.frame.fig.canvas.draw_idle()
                     return
-        if vis:
+        # 鼠标不在 K 线图内时隐藏注释
+        if is_annot_vis:
             self.frame.annot.set_visible(False)
+            self.frame.fig.canvas.draw_idle()
+        # 鼠标不在 K 线图内时隐藏虚线
+        if is_lines_vis:
+            self.frame.horizontal_line.set_visible(False)
+            self.frame.vertical_line.set_visible(False)
             self.frame.fig.canvas.draw_idle()
 
     # 缩放与平移事件处理函数
@@ -142,8 +156,11 @@ class StockDetailController(BaseController):
 
         # 重绘图表
         self.frame.canvas.draw_idle()
-        # 重新初始化注释
+        # 为新图表添加注释文本
         self.frame.annot = self.frame.ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                             bbox=dict(boxstyle='round', fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         self.frame.annot.set_visible(False)
+        # 为新图表添加注释虚线
+        self.frame.horizontal_line = self.frame.ax.axhline(y=self.quotes[0][1], color='gray', linestyle='--', linewidth=1, visible=False)
+        self.frame.vertical_line = self.frame.ax.axvline(x=self.quotes[0][0], color='gray', linestyle='--', linewidth=1, visible=False)
