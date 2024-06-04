@@ -46,6 +46,10 @@ annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                     arrowprops=dict(arrowstyle="->"))
 annot.set_visible(False)
 
+# 添加水平虚线和垂直虚线
+horizontal_line = ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, visible=False)
+vertical_line = ax.axvline(x=0, color='gray', linestyle='--', linewidth=1, visible=False)
+
 # 更新注释文本的内容和位置
 def update_annot(ohlc, x, y):
     date = mdates.num2date(ohlc[0]).strftime('%Y-%m-%d')
@@ -54,18 +58,32 @@ def update_annot(ohlc, x, y):
     annot.set_text(text)
     annot.get_bbox_patch().set_alpha(0.4)
     annot.set_visible(True)
-    canvas.draw_idle()
 
 # 鼠标悬停事件处理函数
 def hover(event):
-    vis = annot.get_visible()
+    is_annot_vis = annot.get_visible()
+    is_lines_vis = annot.get_visible()
     if event.inaxes == ax:
-        for i, bar in enumerate(quotes):
+        # 绘制虚线
+        horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
+        vertical_line.set_xdata([event.xdata, event.xdata])  # 注意这里将 xdata 包装成列表
+        horizontal_line.set_visible(True)
+        vertical_line.set_visible(True)
+        canvas.draw_idle()
+        # 绘制注释
+        for _, bar in enumerate(quotes):
             if bar[0] - 0.3 <= event.xdata <= bar[0] + 0.3:
                 update_annot(bar, event.xdata, event.ydata)
+                canvas.draw_idle()
                 return
-    if vis:
+    # 鼠标不在 K 线图内时隐藏注释
+    if is_annot_vis:
         annot.set_visible(False)
+        canvas.draw_idle()
+    # 鼠标不在 K 线图内时隐藏虚线
+    if is_lines_vis:
+        horizontal_line.set_visible(False)
+        vertical_line.set_visible(False)
         canvas.draw_idle()
 
 # 查找指定时间范围内的最大和最小股价
@@ -155,15 +173,19 @@ canvas.mpl_connect('scroll_event', zoom)
 
 # 刷新数据并重新绘制图表的函数
 def refresh_data():
-    # 因为刷新数据会对 quotes 和 annot 赋值，内部作用域想修改外部作用域必须用 global 申明
+    # 因为刷新数据会对 quotes，annot，horizontal_line，vertical_line 赋值，内部作用域想修改外部作用域必须用 global 申明
     global quotes
     global annot
+    global horizontal_line
+    global vertical_line
+    
     # 获取输入的日期，如果为空则设置默认值
     start_date = start_date_entry.get()
     if not start_date:
         start_date = (datetime.now() - timedelta(days=365)).strftime('%Y%m%d')
     else:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').strftime('%Y%m%d')
+    print(start_date)
 
     end_date = end_date_entry.get()
     if not end_date:
@@ -181,7 +203,6 @@ def refresh_data():
 
     # 清除旧的图表
     ax.clear()
-
     # 绘制新的 K 线图
     candlestick_ohlc(ax, quotes, width=0.6, colorup='r', colordown='g', alpha=0.8)
     ax.xaxis_date()
@@ -189,11 +210,15 @@ def refresh_data():
     ax.grid(True)
     # 重绘图表
     canvas.draw_idle()
-    # 重绘注释文本
+    # 为新图表添加注释文本
     annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                     bbox=dict(boxstyle="round", fc="w"),
                     arrowprops=dict(arrowstyle="->"))
     annot.set_visible(False)
+    # 为新图表添加注释虚线
+    horizontal_line = ax.axhline(y=quotes[0][1], color='gray', linestyle='--', linewidth=1, visible=False)
+    vertical_line = ax.axvline(x=quotes[0][0], color='gray', linestyle='--', linewidth=1, visible=False)
+    
 
 refresh_button = ctk.CTkButton(app, text="刷新", command=refresh_data)
 refresh_button.pack(pady=20)
