@@ -3,6 +3,7 @@ from config import WELCOME_FRAME
 from config import STOCK_DETAIL_WINDOW, STOCK_DETAIL_CONTROLLER, STOCK_DETAIL_MODEL
 from config import EVENT_OPEN_STOCK_DETAIL, EVENT_HIDE_STOCK_DETAIL
 from models import Model
+from .k_training_controller import KTrainingController
 from .magic_nine_controller import MagicNineController
 from .menu_controller import MenuController
 from .stock_detail_window_controller import StockDetailWindowController
@@ -19,6 +20,8 @@ class Controller(Mediator):
         self.magic_nine_controller.mediator = self
         self.menu_controller = MenuController(view, model)
         self.menu_controller.mediator = self
+        self.k_training_controller = KTrainingController(view, model)
+        self.k_training_controller.mediator = self
         # this contains all windows controller for the app
         self.window_controllers = {}
 

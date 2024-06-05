@@ -1,5 +1,7 @@
-from config import APP_NAME, APP_WIDTH, APP_HEIGHT, APP_MIN_WIDTH, APP_MIN_HEIGHT, MAGIC_NINE_FRAME, WELCOME_FRAME
+from config import APP_NAME, APP_WIDTH, APP_HEIGHT, APP_MIN_WIDTH, APP_MIN_HEIGHT
+from config import K_TRAINING_FRAME, MAGIC_NINE_FRAME, WELCOME_FRAME
 from config import STOCK_DETAIL_WINDOW
+from .k_training_view import KTrainingView
 from .magic_nine_view import MagicNineView
 from .menu_view import Menu
 from .welcome_view import WelcomeView
@@ -10,6 +12,7 @@ from typing import TypedDict
 
 # a Dict class to help store all kinds of views
 class Frames(TypedDict):
+    k_training: KTrainingView
     magic_nine: MagicNineView
     welcome: WelcomeView
 
@@ -28,6 +31,7 @@ class View(customtkinter.CTk):
         self._add_menu()
         # this frames contains all views for the app
         self.frames: Frames = {}  # type: ignore
+        self._add_frame(KTrainingView, K_TRAINING_FRAME)
         self._add_frame(MagicNineView, MAGIC_NINE_FRAME)
         self._add_frame(WelcomeView, WELCOME_FRAME)
         # this windows contains all windows for the app

@@ -16,6 +16,7 @@ APP_MIN_HEIGHT=600
 
 # Frames
 MAGIC_NINE_FRAME='magic_nine'
+K_TRAINING_FRAME='k_training'
 WELCOME_FRAME='welcome'
 
 # Windows
@@ -32,6 +33,7 @@ EVENT_HIDE_STOCK_DETAIL='HIDE_STOCK_DETAIL_WINDOWS'
 # ==== Menu Configs ====
 MAGIC_NINE_BTN='神奇九转'
 MAGIC_NINE_BTN_DISABLED='神奇九转加载中...'
+K_TRAINING_BTN='K线训练'
 
 # ==== Welcome Page Configs ====
 WELCOME_MSG='欢迎使用 AMarktTool :)\n'
