@@ -1,9 +1,9 @@
 from customtkinter import CTkFrame, CTkButton
+from customtkinter import CTkCheckBox, CTkLabel
 import customtkinter as ctk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
 
 class DateFrame(CTkFrame):
     def __init__(self, master, label_text):
@@ -13,6 +13,27 @@ class DateFrame(CTkFrame):
         self.date_label.grid(row = 0,column = 0, sticky="nw")
         self.date_entry = ctk.CTkEntry(self, placeholder_text="YYYY-MM-DD")
         self.date_entry.grid(row = 1,column = 0, sticky="nw")
+
+class StockIndicatorCheckboxFrame(CTkFrame):
+    def __init__(self, master, title, values):
+        super().__init__(master)
+        self.grid_rowconfigure(0, weight=1)
+        self.values = values
+        self.title = title
+        self.checkboxes = []
+
+        self.title = CTkLabel(self, text=self.title, fg_color="gray30", corner_radius=6)
+        self.title.grid(row=0, column=0, padx=10, pady=(5, 5), sticky="ns")
+
+        for i, value in enumerate(self.values):
+            checkbox = CTkCheckBox(self, text=value)
+            checkbox.grid(row=0, column=i+1, padx=10, pady=(5, 5))
+            self.checkboxes.append(checkbox)
+    
+    def get_checkbox_by_text(self, text):
+        for checkbox in self.checkboxes:
+            if checkbox.cget("text") == text:
+                return checkbox
 
 class StockDetailView(CTkFrame):    
     def __init__(self, *arg, **kwargs):
@@ -30,6 +51,9 @@ class StockDetailView(CTkFrame):
         # 创建刷新按钮
         self.refresh_button = CTkButton(self, text="刷新")
         self.refresh_button.grid(row = 0, column = 2)
+        # 创建基础股市指标选项框
+        self.stock_indicator_frame = StockIndicatorCheckboxFrame(self, "指标", values=["MA"])
+        self.stock_indicator_frame.grid(row = 0, column = 3)
         
         # 创建 matplotlib 图表
         self.fig = Figure()
@@ -42,7 +66,7 @@ class StockDetailView(CTkFrame):
         
         # 将图表嵌入到 customtkinter 窗口中
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)        
-        self.canvas._tkcanvas.grid(row = 1,column = 0, sticky="nsew", columnspan=3)
+        self.canvas._tkcanvas.grid(row = 1,column = 0, sticky="nsew", columnspan=4)
     
         # 创建注释文本，初始时不可见
         self.annot = self.ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
