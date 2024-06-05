@@ -35,3 +35,13 @@ class StockDetailModel:
         stock_zh_a_hist_df['日期'] = mdates.date2num(np.array(stock_zh_a_hist_df['日期'].dt.to_pydatetime()))
         self.quotes = stock_zh_a_hist_df[['日期', '开盘', '最高', '最低', '收盘']].values
         return self.quotes
+    
+    # 根据 quotes 的收盘价计算 MA 线: MA5，MA10，MA20
+    def get_MAs(self):
+        if len(self.quotes) == 0:
+            return None
+        close_prices = self.quotes[:, 4]  # 收盘价位于第五列
+        ma5 = pd.Series(close_prices).rolling(window=5).mean()
+        ma10 = pd.Series(close_prices).rolling(window=10).mean()
+        ma20 = pd.Series(close_prices).rolling(window=20).mean()
+        return {"MA5": ma5, "MA10":ma10, "MA20": ma20}

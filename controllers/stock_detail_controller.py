@@ -1,4 +1,5 @@
 from config import STOCK_DETAIL_FRAME
+from config import MA_COLOR_MAP
 from models.stock_detail_model import StockDetailModel
 from views.stock_detail_window import StockDetailWindow
 
@@ -22,6 +23,8 @@ class StockDetailController(BaseController):
         self.frame.canvas.mpl_connect('scroll_event', self.zoom_and_pan)
         # 连接按钮的刷新数据事件
         self.frame.refresh_button.configure(command = self.refresh_data)
+        # 链接checkbox的指标绘制事件
+        self.frame.stock_indicator_frame.get_checkbox_by_text(text="MA").configure(command = self.refresh_ma)
         # 窗口开启后默认绘制一次
         self.refresh_data()
         
@@ -164,3 +167,27 @@ class StockDetailController(BaseController):
         # 为新图表添加注释虚线
         self.frame.horizontal_line = self.frame.ax.axhline(y=self.quotes[0][1], color='gray', linestyle='--', linewidth=1, visible=False)
         self.frame.vertical_line = self.frame.ax.axvline(x=self.quotes[0][0], color='gray', linestyle='--', linewidth=1, visible=False)
+        # 重新绘制平均线
+        self.frame.ma_lines.clear()
+        self.refresh_ma()
+        
+    # 移动平均线的绘制函数
+    # 根据 checkbox 的状态绘制或隐藏
+    def refresh_ma(self):
+        if self.frame.stock_indicator_frame.get_checkbox_by_text(text="MA").get():
+            # 如果 MA 线还未绘制，则绘制它们
+            if len(self.frame.ma_lines) == 0:
+                ma_lines = self.model.get_MAs()
+                if ma_lines is None:
+                    return
+                for key, value in ma_lines.items():
+                    self.frame.ma_lines.append(self.frame.ax.plot(self.quotes[:, 0], value, label=key, color=MA_COLOR_MAP[key])[0])
+            else:  # 如果 MA 线已经绘制，则显示它们
+                for ma_line in self.frame.ma_lines:
+                    ma_line.set_visible(True)
+        else:
+            # 如果 MA 线已经绘制，则隐藏它们
+            for ma_line in self.frame.ma_lines:
+                ma_line.set_visible(False)
+        self.frame.ax.legend()
+        self.frame.canvas.draw_idle()

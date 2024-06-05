@@ -58,3 +58,10 @@ STOCK_DETAIL_WINDOW_HEIGHT=800
 
 # Frames
 STOCK_DETAIL_FRAME='stock_detail'
+
+# MA color map
+MA_COLOR_MAP = {
+    'MA5': 'black',
+    'MA10': 'orange',
+    'MA20': 'pink',
+}

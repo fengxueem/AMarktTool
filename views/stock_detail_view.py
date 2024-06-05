@@ -77,3 +77,6 @@ class StockDetailView(CTkFrame):
         # 添加水平虚线和垂直虚线
         self.horizontal_line = self.ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, visible=False)
         self.vertical_line = self.ax.axvline(x=0, color='gray', linestyle='--', linewidth=1, visible=False)
+
+        # 添加 MA 线
+        self.ma_lines = []
