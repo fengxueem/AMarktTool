@@ -7,6 +7,8 @@ class StockDetailModel:
     def __init__(self, key : str) -> None:
         self.key = key
         self.stock_code = self._extract_stock_code()
+        # quotes 记录每一个交易日的股票数据，其中数据存放顺序如下
+        # '日期', '开盘', '最高', '最低', '收盘'
         self.quotes = []
     
     # 从 key 中提取股票代码
@@ -45,3 +47,15 @@ class StockDetailModel:
         ma10 = pd.Series(close_prices).rolling(window=10).mean()
         ma20 = pd.Series(close_prices).rolling(window=20).mean()
         return {"MA5": ma5, "MA10":ma10, "MA20": ma20}
+    
+    # 根据 quotes 的收盘价计算神奇九转发生的日期与当日最高价
+    def get_M9s(self):
+        if len(self.quotes) == 0:
+            return None
+        res = []
+        # 计算神奇九转
+        for i in range(8, len(self.quotes)):
+            # 检查连续9个交易日的收盘价是否都低于它们之前第4天的收盘价
+            if all(self.quotes[j][4] < self.quotes[j - 4][4] for j in range(i-8, i+1)):
+                res.append((self.quotes[i][0], self.quotes[i][2]))
+        return res

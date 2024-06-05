@@ -1,5 +1,5 @@
 from config import STOCK_DETAIL_FRAME
-from config import MA_COLOR_MAP
+from config import MA_COLOR_MAP, STOCK_INDICATOR_MA, STOCK_INDICATOR_MAGIC_NINE
 from models.stock_detail_model import StockDetailModel
 from views.stock_detail_window import StockDetailWindow
 
@@ -24,7 +24,8 @@ class StockDetailController(BaseController):
         # 连接按钮的刷新数据事件
         self.frame.refresh_button.configure(command = self.refresh_data)
         # 链接checkbox的指标绘制事件
-        self.frame.stock_indicator_frame.get_checkbox_by_text(text="MA").configure(command = self.refresh_ma)
+        self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MA).configure(command = self.refresh_ma)
+        self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MAGIC_NINE).configure(command = self.refresh_m9)
         # 窗口开启后默认绘制一次
         self.refresh_data()
         
@@ -170,11 +171,14 @@ class StockDetailController(BaseController):
         # 重新绘制平均线
         self.frame.ma_lines.clear()
         self.refresh_ma()
+        # 重新绘制神奇九转标记
+        self.frame.magic_nine_annotations.clear()
+        self.refresh_m9()
         
     # 移动平均线的绘制函数
     # 根据 checkbox 的状态绘制或隐藏
     def refresh_ma(self):
-        if self.frame.stock_indicator_frame.get_checkbox_by_text(text="MA").get():
+        if self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MA).get():
             # 如果 MA 线还未绘制，则绘制它们
             if len(self.frame.ma_lines) == 0:
                 ma_lines = self.model.get_MAs()
@@ -189,5 +193,32 @@ class StockDetailController(BaseController):
             # 如果 MA 线已经绘制，则隐藏它们
             for ma_line in self.frame.ma_lines:
                 ma_line.set_visible(False)
+        self.frame.ax.legend()
+        self.frame.canvas.draw_idle()
+
+    # 神奇九转的绘制函数
+    # 根据 checkbox 的状态绘制或隐藏
+    def refresh_m9(self):
+        if self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MAGIC_NINE).get():
+            # 如果 MA 线还未绘制，则绘制它们
+            if len(self.frame.magic_nine_annotations) == 0:
+                m9_annots = self.model.get_M9s()
+                if m9_annots is None:
+                    return
+                for (x, y) in m9_annots:
+                    this_annot = self.frame.ax.annotate("", xy=(x, y), xytext=(-2,20), textcoords="offset points",
+                                    bbox=dict(boxstyle='round', fc="r"),
+                                    arrowprops=dict(arrowstyle="->")
+                                )
+                    this_annot.set_text('9')
+                    this_annot.get_bbox_patch().set_alpha(0.4)
+                    self.frame.magic_nine_annotations.append(this_annot)
+            else:  # 如果 MA 线已经绘制，则显示它们
+                for m9_annot in self.frame.magic_nine_annotations:
+                    m9_annot.set_visible(True)
+        else:
+            # 如果 MA 线已经绘制，则隐藏它们
+            for m9_annot in self.frame.magic_nine_annotations:
+                m9_annot.set_visible(False)
         self.frame.ax.legend()
         self.frame.canvas.draw_idle()

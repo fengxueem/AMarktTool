@@ -1,3 +1,5 @@
+from config import STOCK_INDICATOR_MA, STOCK_INDICATOR_MAGIC_NINE
+
 from customtkinter import CTkFrame, CTkButton
 from customtkinter import CTkCheckBox, CTkLabel
 import customtkinter as ctk
@@ -52,7 +54,7 @@ class StockDetailView(CTkFrame):
         self.refresh_button = CTkButton(self, text="刷新")
         self.refresh_button.grid(row = 0, column = 2)
         # 创建基础股市指标选项框
-        self.stock_indicator_frame = StockIndicatorCheckboxFrame(self, "指标", values=["MA"])
+        self.stock_indicator_frame = StockIndicatorCheckboxFrame(self, "指标", values=[STOCK_INDICATOR_MA, STOCK_INDICATOR_MAGIC_NINE])
         self.stock_indicator_frame.grid(row = 0, column = 3)
         
         # 创建 matplotlib 图表
@@ -80,3 +82,6 @@ class StockDetailView(CTkFrame):
 
         # 添加 MA 线
         self.ma_lines = []
+        
+        # 添加神奇九转标记
+        self.magic_nine_annotations= []

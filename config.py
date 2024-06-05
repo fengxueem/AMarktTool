@@ -65,3 +65,7 @@ MA_COLOR_MAP = {
     'MA10': 'orange',
     'MA20': 'pink',
 }
+
+# stock indicator's nicknames
+STOCK_INDICATOR_MA='MA'
+STOCK_INDICATOR_MAGIC_NINE='M9'
