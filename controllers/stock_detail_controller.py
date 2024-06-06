@@ -10,14 +10,15 @@ import matplotlib.dates as mdates
 from mplfinance.original_flavor import candlestick_ohlc
 
 class StockDetailController(BaseController):
-    def __init__(self, view : StockDetailWindow, model : StockDetailModel, stock_code : str) -> None:
+    def __init__(self, view : StockDetailWindow, model : StockDetailModel) -> None:
         self.view = view
         self.model = model
         self.frame = self.view.frames[STOCK_DETAIL_FRAME]
-        self.stock_code = stock_code
         # 存放股票历史数据
         self.quotes = []
-
+        # 修改股票名称和股票代码
+        self.frame.stock_info_frame.stock_code.configure(text=self.model.get_stock_code())
+        self.frame.stock_info_frame.stock_name.configure(text=self.model.get_stock_name())
         # 连接鼠标悬浮事件和滚轮放大事件处理函数
         self.frame.canvas.mpl_connect("motion_notify_event", self.hover)
         self.frame.canvas.mpl_connect('scroll_event', self.zoom_and_pan)

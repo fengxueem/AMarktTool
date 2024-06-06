@@ -37,6 +37,19 @@ class StockIndicatorCheckboxFrame(CTkFrame):
             if checkbox.cget("text") == text:
                 return checkbox
 
+class StockInfoFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        
+        # 创建股票代码和名称
+        self.stock_code = CTkLabel(self, fg_color="gray30", corner_radius=6, font=ctk.CTkFont(size=20))
+        self.stock_code.grid(row = 0, column = 0, padx=10)
+        self.stock_name = CTkLabel(self, fg_color="gray30", corner_radius=6, font=ctk.CTkFont(size=20))
+        self.stock_name.grid(row = 0, column = 1, padx=10)
+
 class StockDetailView(CTkFrame):    
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, **kwargs)
@@ -45,18 +58,22 @@ class StockDetailView(CTkFrame):
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
         self.grid_columnconfigure(3, weight=1)
+        self.grid_columnconfigure(4, weight=1)
         self.grid_rowconfigure(1, weight=1)
+        # 创建股票信息控件
+        self.stock_info_frame = StockInfoFrame(self)
+        self.stock_info_frame.grid(row = 0, column = 0)
         # 创建日期输入控件和刷新按钮
         self.start_date_frame = DateFrame(self, "开始日期:")
-        self.start_date_frame.grid(row = 0, column = 0)
+        self.start_date_frame.grid(row = 0, column = 1)
         self.end_date_frame = DateFrame(self, "结束日期:")
-        self.end_date_frame.grid(row = 0, column = 1)        
+        self.end_date_frame.grid(row = 0, column = 2)        
         # 创建刷新按钮
         self.refresh_button = CTkButton(self, text="刷新")
-        self.refresh_button.grid(row = 0, column = 2)
+        self.refresh_button.grid(row = 0, column = 3)
         # 创建基础股市指标选项框
         self.stock_indicator_frame = StockIndicatorCheckboxFrame(self, "指标", values=[STOCK_INDICATOR_MA, STOCK_INDICATOR_MAGIC_NINE])
-        self.stock_indicator_frame.grid(row = 0, column = 3)
+        self.stock_indicator_frame.grid(row = 0, column = 4)
         
         # 创建 matplotlib 图表
         self.fig = Figure()
@@ -69,7 +86,7 @@ class StockDetailView(CTkFrame):
         
         # 将图表嵌入到 customtkinter 窗口中
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)        
-        self.canvas._tkcanvas.grid(row = 1,column = 0, sticky="nsew", columnspan=4)
+        self.canvas._tkcanvas.grid(row = 1,column = 0, sticky="nsew", columnspan=5)
     
         # 创建注释文本，初始时不可见
         self.annot = self.ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",

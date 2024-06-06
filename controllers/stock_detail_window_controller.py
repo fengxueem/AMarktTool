@@ -11,12 +11,8 @@ class StockDetailWindowController(BaseController):
         self.view = view.windows[key]
         self.view.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.model = model.models[key]
-        self.stock_code = self._extract_stock_code()
-        self.stock_detail_controller = StockDetailController(self.view, self.model, self.stock_code)
+        self.stock_detail_controller = StockDetailController(self.view, self.model)
         self.stock_detail_controller.mediator = self
-    
-    def _extract_stock_code(self):
-        return self.key[-6:]
     
     def on_closing(self):
         self.mediator.notify(self, "HIDE_STOCK_DETAIL_WINDOWS", self.key)
