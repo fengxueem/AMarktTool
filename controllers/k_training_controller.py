@@ -13,6 +13,8 @@ class KTrainingController(BaseController):
         self.view = view
         self.model = model
         self.frame = self.view.frames[K_TRAINING_FRAME]
+        # 关闭刷新按钮
+        self.frame.trading_frame.refresh_button.configure(state='disabled')
         # 连接鼠标悬浮事件处理函数
         self.frame.canvas.mpl_connect("motion_notify_event", self.hover)
         # 连接checkbox的指标绘制事件
@@ -22,6 +24,7 @@ class KTrainingController(BaseController):
         self.frame.trading_frame.buy_button.configure(command = self.buy)
         self.frame.trading_frame.sell_button.configure(command = self.sell)
         self.frame.trading_frame.next_button.configure(command = self.next_day)
+        self.frame.trading_frame.refresh_button.configure(command = self.start_a_new_play)
         # 买入：上键
         # 卖出：下键
         # 下一日：空格键
@@ -29,7 +32,7 @@ class KTrainingController(BaseController):
         view.bind("<Down>", lambda event: self.sell())
         view.bind("<space>", lambda event: self.next_day())
         # 窗口开启后默认绘制一次
-        self.refresh_data()
+        self.refresh_figure()
         self.update_pocket_frame()
 
     # 更新注释文本的内容和位置
@@ -67,7 +70,7 @@ class KTrainingController(BaseController):
             self.frame.fig.canvas.draw_idle()
 
     # 刷新数据并重新绘制图表的函数
-    def refresh_data(self):
+    def refresh_figure(self):
         # 清除旧的图表
         self.frame.ax.clear()
 
@@ -80,7 +83,7 @@ class KTrainingController(BaseController):
         new_xlim = [self.model.k_training_model.start_date, self.model.k_training_model.start_training_date]
         self.frame.ax.set_xlim(new_xlim)
         # 隐藏刻度标签
-        self.frame.ax.set_xticklabels([])
+        # self.frame.ax.set_xticklabels([])
 
         # 重绘图表
         self.frame.canvas.draw_idle()
@@ -164,10 +167,11 @@ class KTrainingController(BaseController):
             
     def settle_this_play(self):
         self.model.k_training_model.settel()
-        # 禁用控制按钮
+        # 更改控制按钮
         self.frame.trading_frame.next_button.configure(state='disabled')
         self.frame.trading_frame.buy_button.configure(state='disabled')
         self.frame.trading_frame.sell_button.configure(state='disabled')
+        self.frame.trading_frame.refresh_button.configure(state='normal')
         # 更新新一天的交易信息
         self.update_pocket_frame()
         # 重绘图表
@@ -187,3 +191,13 @@ class KTrainingController(BaseController):
     def sell(self):
         self.model.k_training_model.sell(1.0)
         self.next_day()
+    
+    def start_a_new_play(self):
+        self.model.k_training_model.restart()
+        self.refresh_figure()
+        self.update_pocket_frame()
+        # 更改控制按钮
+        self.frame.trading_frame.next_button.configure(state='normal')
+        self.frame.trading_frame.buy_button.configure(state='normal')
+        self.frame.trading_frame.sell_button.configure(state='normal')
+        self.frame.trading_frame.refresh_button.configure(state='disabled')

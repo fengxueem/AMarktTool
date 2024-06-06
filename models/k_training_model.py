@@ -19,21 +19,21 @@ class KTrainingModel:
         # 获取沪 A 股实时行情数据
         # 不要垃圾 ST 股票！！！
         self.all_stocks = self.get_all_stock_no_trash_ST()
-        # 剩余的k线根数，开局总是 150
+        # 剩余的k线根数，每一句开局总是 150
         self.kandle_left = K_TRAINING_DEFAULT_KANDLE_LEFT
-        # 钱包余额，开局总是 10k
+        # 钱包余额，每一句开局总是 10k 或上一局结束的余额
         self.money_left = K_TRAINING_DEFAULT_MONEY_LEFT
-        # 钱包余额，开局总是 10k
+        # 上一局钱包余额，若还未开局则默认是 10k
         self.last_money_left = K_TRAINING_DEFAULT_MONEY_LEFT
-        # 股份余额，开局总是 0 股
+        # 股份余额，每一句开局总是 0 股
         self.stock_left = 0
-        # 成本价，开局总是 None
+        # 成本价，每一句开局总是 None
         self.cost_price = None
-        # 仓位，开局总是 0%
+        # 仓位，每一句开局总是 0%
         self.position = 0.0
-        # 本局利润比例，开局总是0%
+        # 本局利润比例，每一句开局总是0%
         self.total_profit = 0.0
-        # 当前持仓利润比例，开局总是0%
+        # 当前持仓利润比例，每一句开局总是0%
         self.open_profit = 0.0
         # 随机挑选一只股票用于之后的k线训练
         self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date = self.random_pick_a_stock()
@@ -41,6 +41,20 @@ class KTrainingModel:
         self.current_training_date = self.start_training_date
         self.current_training_index = -self.kandle_left - 1
         
+    def restart(self):
+        # 恢复默认值
+        self.kandle_left = K_TRAINING_DEFAULT_KANDLE_LEFT
+        self.stock_left = 0
+        self.cost_price = None
+        self.position = 0.0
+        self.total_profit = 0.0
+        self.open_profit = 0.0
+        self.last_money_left = self.money_left
+        # 随机挑选一只股票用于之后的k线训练
+        self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date = self.random_pick_a_stock()
+        # 记录当前的训练日期
+        self.current_training_date = self.start_training_date
+        self.current_training_index = -self.kandle_left - 1
 
     # 获取沪深两个市场的股票代码，不包含 ST 垃圾股票
     def get_all_stock_no_trash_ST(self):
@@ -166,14 +180,6 @@ class KTrainingModel:
         # 如果还有股票在手里则强制以最后一天收盘价卖出
         if self.stock_left > 0:
             self.money_left += self.quotes[-1][4] * self.stock_left
-        # 恢复默认值等待下一局开始
-        self.kandle_left = 0
-        self.stock_left = 0
-        self.cost_price = None
-        self.position = 0.0
-        self.total_profit = 0.0
-        self.open_profit = 0.0
-        self.last_money_left = self.money_left
 
     def sell(self, portion):
         # 没有持股，无法卖出

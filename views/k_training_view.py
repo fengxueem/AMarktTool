@@ -47,6 +47,9 @@ class TradingFrame(CTkFrame):
         # 下一日按钮
         self.next_button = CTkButton(self, width=100, text="Next(空格)", font=ctk.CTkFont(weight='bold', size=14))
         self.next_button.grid(row=0, column=2, padx=5)
+        # 刷新按钮
+        self.refresh_button = CTkButton(self, width=100, text="下一局", font=ctk.CTkFont(weight='bold', size=14))
+        self.refresh_button.grid(row=0, column=3, padx=5)
 
 class PocketFrame(CTkFrame):
     def __init__(self, master):
