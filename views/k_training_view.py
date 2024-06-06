@@ -45,8 +45,8 @@ class TradingFrame(CTkFrame):
         self.sell_button = CTkButton(self, width=100, text="Sell(↓)", fg_color='blue', font=ctk.CTkFont(weight='bold', size=14))
         self.sell_button.grid(row=0, column=1, padx=5)
         # 下一日按钮
-        self.sell_button = CTkButton(self, width=100, text="Next(空格)", font=ctk.CTkFont(weight='bold', size=14))
-        self.sell_button.grid(row=0, column=2, padx=5)
+        self.next_button = CTkButton(self, width=100, text="Next(空格)", font=ctk.CTkFont(weight='bold', size=14))
+        self.next_button.grid(row=0, column=2, padx=5)
 
 class PocketFrame(CTkFrame):
     def __init__(self, master):

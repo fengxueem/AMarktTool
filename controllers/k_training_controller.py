@@ -16,16 +16,17 @@ class KTrainingController(BaseController):
         self.frame = self.view.frames[K_TRAINING_FRAME]
         # 连接鼠标悬浮事件处理函数
         self.frame.canvas.mpl_connect("motion_notify_event", self.hover)
-        # 链接checkbox的指标绘制事件
+        # 连接checkbox的指标绘制事件
         self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MA).configure(command = self.refresh_ma)
         self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MAGIC_NINE).configure(command = self.refresh_m9)
+        # 连接控制按钮
+        self.frame.trading_frame.next_button.configure(command = self.next_day)
         # 窗口开启后默认绘制一次
         self.refresh_data()
-        
+
     # 更新注释文本的内容和位置
     def update_annot(self, ohlc, x, y):
-        date = mdates.num2date(ohlc[0]).strftime('%Y-%m-%d')
-        text = f"date: {date}\nopen: {ohlc[1]}\nclose: {ohlc[2]}\nhigh: {ohlc[3]}\nlow: {ohlc[4]}"
+        text = f"open: {ohlc[1]}\nclose: {ohlc[2]}\nhigh: {ohlc[3]}\nlow: {ohlc[4]}"
         self.frame.annot.xy = (x, y)
         self.frame.annot.set_text(text)
         self.frame.annot.get_bbox_patch().set_alpha(0.4)
@@ -91,8 +92,7 @@ class KTrainingController(BaseController):
         self.refresh_m9()
         # 重新绘制训练起始虚线
         self.frame.start_training_vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.start_training_date, color='red', linestyle='--', linewidth=2)
-
-        
+   
     # 移动平均线的绘制函数
     # 根据 checkbox 的状态绘制或隐藏
     def refresh_ma(self):
@@ -139,4 +139,15 @@ class KTrainingController(BaseController):
             for m9_annot in self.frame.magic_nine_annotations:
                 m9_annot.set_visible(False)
         self.frame.ax.legend()
+        self.frame.canvas.draw_idle()
+    
+    # 训练进入下一个交易日
+    def next_day(self):
+        self.model.k_training_model.go_to_next_day()
+        # 更新图表x轴范围
+        new_xlim = [self.model.k_training_model.start_date, self.model.k_training_model.current_training_date]
+        self.frame.ax.set_xlim(new_xlim)
+        # 更新剩余k线
+        self.frame.pocket_frame.candle_left_str.configure(text=str(self.model.k_training_model.kandle_left))
+        # 重绘图表
         self.frame.canvas.draw_idle()
