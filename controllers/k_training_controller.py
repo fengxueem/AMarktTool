@@ -5,7 +5,6 @@ from views import View
 
 from .__base__ import BaseController
 
-from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 from mplfinance.original_flavor import candlestick_ohlc
 
@@ -19,10 +18,19 @@ class KTrainingController(BaseController):
         # 连接checkbox的指标绘制事件
         self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MA).configure(command = self.refresh_ma)
         self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MAGIC_NINE).configure(command = self.refresh_m9)
-        # 连接控制按钮
+        # 连接控制按钮对应的函数并设置键盘快捷方式
+        self.frame.trading_frame.buy_button.configure(command = self.buy)
+        self.frame.trading_frame.sell_button.configure(command = self.sell)
         self.frame.trading_frame.next_button.configure(command = self.next_day)
+        # 买入：上键
+        # 卖出：下键
+        # 下一日：空格键
+        view.bind("<Up>", lambda event: self.buy())
+        view.bind("<Down>", lambda event: self.sell())
+        view.bind("<space>", lambda event: self.next_day())
         # 窗口开启后默认绘制一次
         self.refresh_data()
+        self.update_pocket_frame()
 
     # 更新注释文本的内容和位置
     def update_annot(self, ohlc, x, y):
@@ -147,7 +155,35 @@ class KTrainingController(BaseController):
         # 更新图表x轴范围
         new_xlim = [self.model.k_training_model.start_date, self.model.k_training_model.current_training_date]
         self.frame.ax.set_xlim(new_xlim)
-        # 更新剩余k线
-        self.frame.pocket_frame.candle_left_str.configure(text=str(self.model.k_training_model.kandle_left))
+        # 更新新一天的交易信息
+        self.update_pocket_frame()
         # 重绘图表
         self.frame.canvas.draw_idle()
+        if self.model.k_training_model.is_end():
+            self.settle_this_play()
+            
+    def settle_this_play(self):
+        self.model.k_training_model.settel()
+        # 禁用控制按钮
+        self.frame.trading_frame.next_button.configure(state='disabled')
+        self.frame.trading_frame.buy_button.configure(state='disabled')
+        self.frame.trading_frame.sell_button.configure(state='disabled')
+        # 更新新一天的交易信息
+        self.update_pocket_frame()
+        # 重绘图表
+        self.frame.canvas.draw_idle()
+        
+    def update_pocket_frame(self):
+        self.frame.pocket_frame.money_left_str.configure(text=self.model.k_training_model.get_money_left_str())
+        self.frame.pocket_frame.position_str.configure(text=self.model.k_training_model.get_position_str())
+        self.frame.pocket_frame.total_profit_str.configure(text=self.model.k_training_model.get_total_profit_str())
+        self.frame.pocket_frame.open_profit_str.configure(text=self.model.k_training_model.get_open_profit_str())
+        self.frame.pocket_frame.candle_left_str.configure(text=self.model.k_training_model.get_kandle_left_str())
+
+    def buy(self):
+        self.model.k_training_model.buy(1.0)
+        self.next_day()
+        
+    def sell(self):
+        self.model.k_training_model.sell(1.0)
+        self.next_day()
