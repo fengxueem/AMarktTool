@@ -59,13 +59,16 @@ class KTrainingView(CTkFrame):
                             arrowprops=dict(arrowstyle="->"))
         self.annot.set_visible(False)
         
-        # 添加水平虚线和垂直虚线
-        self.horizontal_line = self.ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, visible=False)
-        self.vertical_line = self.ax.axvline(x=0, color='gray', linestyle='--', linewidth=1, visible=False)
+        # 添加鼠标悬浮水平虚线和垂直虚线
+        self.mouse_horizontal_line = self.ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, visible=False)
+        self.mouse_vertical_line = self.ax.axvline(x=0, color='gray', linestyle='--', linewidth=1, visible=False)
         
         # 添加 MA 线
         self.ma_lines = []
         
         # 添加神奇九转标记
         self.magic_nine_annotations= []
+        
+        # 添加训练起始虚线
+        self.start_training_vertical_line = None
     

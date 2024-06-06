@@ -33,7 +33,7 @@ class KTrainingController(BaseController):
     # 鼠标悬停事件处理函数
     def hover(self, event):
         is_annot_vis = self.frame.annot.get_visible()
-        is_lines_vis = self.frame.horizontal_line.get_visible()
+        is_lines_vis = self.frame.mouse_horizontal_line.get_visible()
         if event.inaxes == self.frame.ax:
             for _, bar in enumerate(self.model.k_training_model.quotes):
                 if bar[0] - 0.3 <= event.xdata <= bar[0] + 0.3:
@@ -41,10 +41,10 @@ class KTrainingController(BaseController):
                     self.update_annot(bar, bar[0], bar[4])
                     self.frame.annot.set_visible(True)
                     # 绘制虚线
-                    self.frame.horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
-                    self.frame.vertical_line.set_xdata([bar[0], bar[0]])  # 注意这里将 xdata 包装成列表
-                    self.frame.horizontal_line.set_visible(True)
-                    self.frame.vertical_line.set_visible(True)
+                    self.frame.mouse_horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
+                    self.frame.mouse_vertical_line.set_xdata([bar[0], bar[0]])  # 注意这里将 xdata 包装成列表
+                    self.frame.mouse_horizontal_line.set_visible(True)
+                    self.frame.mouse_vertical_line.set_visible(True)
                     self.frame.fig.canvas.draw_idle()
                     return
         # 鼠标不在 K 线图内时隐藏注释
@@ -53,8 +53,8 @@ class KTrainingController(BaseController):
             self.frame.fig.canvas.draw_idle()
         # 鼠标不在 K 线图内时隐藏虚线
         if is_lines_vis:
-            self.frame.horizontal_line.set_visible(False)
-            self.frame.vertical_line.set_visible(False)
+            self.frame.mouse_horizontal_line.set_visible(False)
+            self.frame.mouse_vertical_line.set_visible(False)
             self.frame.fig.canvas.draw_idle()
 
     # 刷新数据并重新绘制图表的函数
@@ -67,23 +67,31 @@ class KTrainingController(BaseController):
         self.frame.ax.xaxis_date()
         self.frame.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         self.frame.ax.grid(True)
+        # 这是训练开始时的x轴范围
+        new_xlim = [self.model.k_training_model.start_date, self.model.k_training_model.start_training_date]
+        self.frame.ax.set_xlim(new_xlim)
+        # 隐藏刻度标签
+        self.frame.ax.set_xticklabels([])
 
         # 重绘图表
         self.frame.canvas.draw_idle()
         # 为新图表添加注释文本
-        self.frame.annot = self.frame.ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
+        self.frame.annot = self.frame.ax.annotate("", xy=(0,0), xytext=(10,20), textcoords="offset points",
                             bbox=dict(boxstyle='round', fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         self.frame.annot.set_visible(False)
         # 为新图表添加注释虚线
-        self.frame.horizontal_line = self.frame.ax.axhline(y=self.model.k_training_model.quotes[0][1], color='gray', linestyle='--', linewidth=1, visible=False)
-        self.frame.vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.quotes[0][0], color='gray', linestyle='--', linewidth=1, visible=False)
+        self.frame.mouse_horizontal_line = self.frame.ax.axhline(y=self.model.k_training_model.quotes[0][1], color='gray', linestyle='--', linewidth=1, visible=False)
+        self.frame.mouse_vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.quotes[0][0], color='gray', linestyle='--', linewidth=1, visible=False)
         # 重新绘制平均线
         self.frame.ma_lines.clear()
         self.refresh_ma()
         # 重新绘制神奇九转标记
         self.frame.magic_nine_annotations.clear()
         self.refresh_m9()
+        # 重新绘制训练起始虚线
+        self.frame.start_training_vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.start_training_date, color='red', linestyle='--', linewidth=2)
+
         
     # 移动平均线的绘制函数
     # 根据 checkbox 的状态绘制或隐藏
