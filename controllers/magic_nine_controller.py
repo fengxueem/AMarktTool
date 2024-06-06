@@ -62,13 +62,13 @@ class MagicNineController(BaseController):
             magic_nine_table.heading(c, command=lambda _col=c: sort_func(magic_nine_table, _col, False))
         # 将show_details函数绑定到Treeview部件的点击事件上
         magic_nine_table.bind("<<TreeviewSelect>>", self.show_stock_detail)
-        # start calculating magic nine as soon as the app started
+        # 开始计算神奇九转，按钮功能关闭，显示加载中
+        self.view.menu.magic_nine_button.configure(state='disabled')
+        self.view.menu.magic_nine_button.configure(text=MAGIC_NINE_BTN_DISABLED)
         t = threading.Thread(target=self.init_table, args=())
         t.start()
         
     def init_table(self) -> None:
-        self.view.menu.magic_nine_button.configure(state='disabled')
-        self.view.menu.magic_nine_button.configure(text=MAGIC_NINE_BTN_DISABLED)
         magic_stocks = self.model.magic_nine_model.init_table()
         for stock in magic_stocks:
             self.frame.table.insert('', 'end', values = stock)
