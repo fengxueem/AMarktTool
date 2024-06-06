@@ -12,7 +12,7 @@ APP_MIN_WIDTH=600
 APP_HEIGHT=750
 
 # Application Minimal Height
-APP_MIN_HEIGHT=600
+APP_MIN_HEIGHT=700
 
 # Frames
 MAGIC_NINE_FRAME='magic_nine'
@@ -71,3 +71,29 @@ MA_COLOR_MAP = {
 # stock indicator's nicknames
 STOCK_INDICATOR_MA='MA'
 STOCK_INDICATOR_MAGIC_NINE='M9'
+
+# ==== K Training Configs ====
+# default values when training starts
+K_TRAINING_DEFAULT_KANDLE_LEFT=150
+K_TRAINING_DEFAULT_MONEY_LEFT=10000
+
+# stock data structure
+STOCK_DATA_CODE='代码'
+STOCK_DATA_NAME='名称'
+STOCK_DATA_LISTING_DATE='上市日期'
+
+# moving average lines
+K_TRAINING_MA_LINE_5='MA5'
+K_TRAINING_MA_LINE_10='MA10'
+K_TRAINING_MA_LINE_20='MA20'
+
+# ==== akshare API Configs ====
+AK_API_SH_STOCK_NAME='证券简称'
+AK_API_SZ_STOCK_NAME='A股简称'
+AK_API_STUPID_ST='ST'
+AK_API_HIST_DF_DATE='日期'
+AK_API_HIST_DF_OPEN='开盘'
+AK_API_HIST_DF_CLOSE='最高'
+AK_API_HIST_DF_HIGH='最低'
+AK_API_HIST_DF_LOW='收盘'
+AK_API_STOCK_DF_NAME='名称'

@@ -1,3 +1,11 @@
+from config import K_TRAINING_DEFAULT_KANDLE_LEFT
+from config import K_TRAINING_DEFAULT_MONEY_LEFT
+from config import STOCK_DATA_CODE, STOCK_DATA_NAME
+from config import STOCK_DATA_LISTING_DATE
+from config import AK_API_SH_STOCK_NAME, AK_API_SZ_STOCK_NAME, AK_API_STUPID_ST
+from config import AK_API_HIST_DF_DATE, AK_API_HIST_DF_OPEN, AK_API_HIST_DF_CLOSE, AK_API_HIST_DF_HIGH, AK_API_HIST_DF_LOW
+from config import K_TRAINING_MA_LINE_5, K_TRAINING_MA_LINE_10, K_TRAINING_MA_LINE_20
+
 import akshare as ak
 from datetime import datetime, timedelta
 import random
@@ -12,11 +20,11 @@ class KTrainingModel:
         # 不要垃圾 ST 股票！！！
         self.all_stocks = self.get_all_stock_no_trash_ST()
         # 剩余的k线根数，开局总是 150
-        self.kandle_left = 150
+        self.kandle_left = K_TRAINING_DEFAULT_KANDLE_LEFT
         # 钱包余额，开局总是 10k
-        self.money_left = 10000
+        self.money_left = K_TRAINING_DEFAULT_MONEY_LEFT
         # 钱包余额，开局总是 10k
-        self.last_money_left = 10000
+        self.last_money_left = K_TRAINING_DEFAULT_MONEY_LEFT
         # 股份余额，开局总是 0 股
         self.stock_left = 0
         # 成本价，开局总是 None
@@ -37,14 +45,14 @@ class KTrainingModel:
     # 获取沪深两个市场的股票代码，不包含 ST 垃圾股票
     def get_all_stock_no_trash_ST(self):
         shanghai_stock_df = ak.stock_info_sh_name_code()
-        shanghai_stock_df = shanghai_stock_df[~shanghai_stock_df["证券简称"].str.contains("ST")]
+        shanghai_stock_df = shanghai_stock_df[~shanghai_stock_df[AK_API_SH_STOCK_NAME].str.contains(AK_API_STUPID_ST)]
         # 创建一个新的列表，只保留原先需要的属性
-        new_shanghai_stock = [{"代码": item[0], "名称": item[1], "上市日期": item[3]} for item in shanghai_stock_df.values]
+        new_shanghai_stock = [{STOCK_DATA_CODE: item[0], STOCK_DATA_NAME: item[1], STOCK_DATA_LISTING_DATE: item[3]} for item in shanghai_stock_df.values]
 
         # 获取深 A 股实时行情数据
         shenzhen_stock_df = ak.stock_info_sz_name_code()
-        shenzhen_stock_df = shenzhen_stock_df[~shenzhen_stock_df["A股简称"].str.contains("ST")]
-        new_shenzhen_stock = [{"代码": item[1], "名称": item[2], "上市日期": item[3]} for item in shenzhen_stock_df.values]
+        shenzhen_stock_df = shenzhen_stock_df[~shenzhen_stock_df[AK_API_SZ_STOCK_NAME].str.contains(AK_API_STUPID_ST)]
+        new_shenzhen_stock = [{STOCK_DATA_CODE: item[1], STOCK_DATA_NAME: item[2], STOCK_DATA_LISTING_DATE: item[3]} for item in shenzhen_stock_df.values]
 
         # 合并两个市场的股票
         return new_shanghai_stock + new_shenzhen_stock
@@ -52,14 +60,14 @@ class KTrainingModel:
     def random_pick_a_stock(self):
         this_stock = random.choice(self.all_stocks)
         end_date, start_date = self.get_random_time()
-        listing_date = pd.to_datetime(this_stock['上市日期'])
+        listing_date = pd.to_datetime(this_stock[STOCK_DATA_LISTING_DATE])
         # 查询上市日期是否在随机生成的开始日期前
         # 保证我们有足够天数的训练样本
         while listing_date > start_date:
             this_stock = random.choice(self.all_stocks)
             end_date, start_date = self.get_random_time()
-            listing_date = pd.to_datetime(this_stock['上市日期'])
-        quotes = self.get_stock_quotes(this_stock['代码'], start_date, end_date)
+            listing_date = pd.to_datetime(this_stock[STOCK_DATA_LISTING_DATE])
+        quotes = self.get_stock_quotes(this_stock[STOCK_DATA_CODE], start_date, end_date)
         start_training_date = quotes[-self.kandle_left - 1][0]
         return this_stock, start_date, end_date, quotes, start_training_date
     
@@ -74,9 +82,9 @@ class KTrainingModel:
             )
 
         # 准备数据格式
-        stock_zh_a_hist_df['日期'] = pd.to_datetime(stock_zh_a_hist_df['日期'])
-        stock_zh_a_hist_df['日期'] = mdates.date2num(np.array(stock_zh_a_hist_df['日期'].dt.to_pydatetime()))
-        return stock_zh_a_hist_df[['日期', '开盘', '最高', '最低', '收盘']].values
+        stock_zh_a_hist_df[AK_API_HIST_DF_DATE] = pd.to_datetime(stock_zh_a_hist_df[AK_API_HIST_DF_DATE])
+        stock_zh_a_hist_df[AK_API_HIST_DF_DATE] = mdates.date2num(np.array(stock_zh_a_hist_df[AK_API_HIST_DF_DATE].dt.to_pydatetime()))
+        return stock_zh_a_hist_df[[AK_API_HIST_DF_DATE, AK_API_HIST_DF_OPEN, AK_API_HIST_DF_HIGH, AK_API_HIST_DF_LOW, AK_API_HIST_DF_CLOSE]].values
 
     # 随机生成一对至少间隔24个月的时间对
     def get_random_time(self):
@@ -96,7 +104,7 @@ class KTrainingModel:
         ma5 = pd.Series(close_prices).rolling(window=5).mean()
         ma10 = pd.Series(close_prices).rolling(window=10).mean()
         ma20 = pd.Series(close_prices).rolling(window=20).mean()
-        return {"MA5": ma5, "MA10":ma10, "MA20": ma20}
+        return {K_TRAINING_MA_LINE_5: ma5, K_TRAINING_MA_LINE_10: ma10, K_TRAINING_MA_LINE_20: ma20}
     
     # 根据 quotes 的收盘价计算神奇九转发生的日期与当日最高价
     def get_M9s(self):
