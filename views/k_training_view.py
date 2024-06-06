@@ -3,6 +3,7 @@ from config import STOCK_INDICATOR_MA, STOCK_INDICATOR_MAGIC_NINE
 from customtkinter import CTkFrame
 from customtkinter import CTkLabel
 from customtkinter import CTkCheckBox
+from customtkinter import CTkButton
 import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -30,16 +31,74 @@ class StockIndicatorCheckboxFrame(CTkFrame):
             if checkbox.cget("text") == text:
                 return checkbox
 
+class TradingFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+        # 买入按钮
+        self.buy_button = CTkButton(self, width=100, text="Buy(↑)", fg_color='red', font=ctk.CTkFont(weight='bold', size=14))
+        self.buy_button.grid(row=0, column=0, padx=5)
+        # 卖出按钮
+        self.sell_button = CTkButton(self, width=100, text="Sell(↓)", fg_color='blue', font=ctk.CTkFont(weight='bold', size=14))
+        self.sell_button.grid(row=0, column=1, padx=5)
+        # 下一日按钮
+        self.sell_button = CTkButton(self, width=100, text="Next(空格)", font=ctk.CTkFont(weight='bold', size=14))
+        self.sell_button.grid(row=0, column=2, padx=5)
+
+class PocketFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        # 钱包额度
+        self.money_left_str = CTkLabel(self, text='0', fg_color="gray30", corner_radius=6, font=ctk.CTkFont(weight='bold', size=14))
+        self.money_left_str.grid(row=0, column=0, padx=20)
+        self.money_left = CTkLabel(self, text='钱包余额', fg_color="gray30", corner_radius=6)
+        self.money_left.grid(row=1, column=0, padx=20)
+        # 仓位
+        self.position_str = CTkLabel(self, text='0%', fg_color="gray30", corner_radius=6, font=ctk.CTkFont(weight='bold', size=14))
+        self.position_str.grid(row=0, column=1, padx=10)
+        self.position = CTkLabel(self, text='仓位', fg_color="gray30", corner_radius=6)
+        self.position.grid(row=1, column=1, padx=10)
+        # 本局收益
+        self.total_profit_str = CTkLabel(self, text='0%', fg_color="gray30", corner_radius=6, font=ctk.CTkFont(weight='bold', size=14))
+        self.total_profit_str.grid(row=0, column=2, padx=10)
+        self.total_profit = CTkLabel(self, text='本局收益', fg_color="gray30", corner_radius=6)
+        self.total_profit.grid(row=1, column=2, padx=10)
+        # 开仓收益
+        self.open_profit_str = CTkLabel(self, text='0%', fg_color="gray30", corner_radius=6, font=ctk.CTkFont(weight='bold', size=14))
+        self.open_profit_str.grid(row=0, column=3, padx=10)
+        self.open_profit = CTkLabel(self, text='开仓收益', fg_color="gray30", corner_radius=6)
+        self.open_profit.grid(row=1, column=3, padx=10)
+        # 剩余k线
+        self.candle_left_str = CTkLabel(self, text='150', fg_color="gray30", corner_radius=6, font=ctk.CTkFont(weight='bold', size=14))
+        self.candle_left_str.grid(row=0, column=4, padx=10)
+        self.candle_left = CTkLabel(self, text='剩余k线', fg_color="gray30", corner_radius=6)
+        self.candle_left.grid(row=1, column=4, padx=10)
+
 class KTrainingView(CTkFrame):    
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, **kwargs)
         # let child widgets use the whole window space
         self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=100)
+        # 创建买入卖出按钮
+        self.trading_frame = TradingFrame(self)
+        self.trading_frame.grid(row=0, column=0)
         # 创建基础股市指标选项框
         self.stock_indicator_frame = StockIndicatorCheckboxFrame(self, "指标", values=[STOCK_INDICATOR_MA, STOCK_INDICATOR_MAGIC_NINE])
-        self.stock_indicator_frame.grid(row=0, column=0)
+        self.stock_indicator_frame.grid(row=0, column=1)
+        # 创建利润详情显示框
+        self.pocket_frame = PocketFrame(self) 
+        self.pocket_frame.grid(row=0, column=2)
+        
         # 创建 matplotlib 图表
         self.fig = Figure()
         # 调整绘图的面积，尽可能充满整个窗口
@@ -51,7 +110,7 @@ class KTrainingView(CTkFrame):
         
         # 将图表嵌入到 customtkinter 窗口中
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)        
-        self.canvas._tkcanvas.grid(row = 1,column = 0, sticky="nsew", columnspan=1)
+        self.canvas._tkcanvas.grid(row = 1,column = 0, sticky="nsew", columnspan=3)
         
         # 创建注释文本，初始时不可见
         self.annot = self.ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
