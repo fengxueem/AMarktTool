@@ -35,17 +35,16 @@ class KTrainingController(BaseController):
         is_annot_vis = self.frame.annot.get_visible()
         is_lines_vis = self.frame.horizontal_line.get_visible()
         if event.inaxes == self.frame.ax:
-            # 绘制虚线
-            self.frame.horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
-            self.frame.vertical_line.set_xdata([event.xdata, event.xdata])  # 注意这里将 xdata 包装成列表
-            self.frame.horizontal_line.set_visible(True)
-            self.frame.vertical_line.set_visible(True)
-            self.frame.fig.canvas.draw_idle()
-            # 绘制注释
             for _, bar in enumerate(self.model.k_training_model.quotes):
                 if bar[0] - 0.3 <= event.xdata <= bar[0] + 0.3:
-                    self.update_annot(bar, event.xdata, event.ydata)
+                    # 绘制注释
+                    self.update_annot(bar, bar[0], bar[4])
                     self.frame.annot.set_visible(True)
+                    # 绘制虚线
+                    self.frame.horizontal_line.set_ydata([event.ydata, event.ydata])  # 注意这里将 ydata 包装成列表
+                    self.frame.vertical_line.set_xdata([bar[0], bar[0]])  # 注意这里将 xdata 包装成列表
+                    self.frame.horizontal_line.set_visible(True)
+                    self.frame.vertical_line.set_visible(True)
                     self.frame.fig.canvas.draw_idle()
                     return
         # 鼠标不在 K 线图内时隐藏注释
