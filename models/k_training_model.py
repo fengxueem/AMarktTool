@@ -271,7 +271,6 @@ class KTrainingModel:
     def save_records_to_yaml(self):       
         # 将数据写入 YAML 文件
         with open(self.record_file_path, 'w') as file:
-            print(f'int(self.last_money_left):{int(self.last_money_left)}')
             yaml.dump(
                 {
                     'last_money_left': int(self.last_money_left)
