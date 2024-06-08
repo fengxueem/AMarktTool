@@ -40,6 +40,11 @@ class KTrainingModel:
         # 记录当前的训练日期
         self.current_training_date = self.start_training_date
         self.current_training_index = -self.kandle_left - 1
+        # 记录本局的买入卖出日期
+        # （买入日期，收盘价）
+        self.buy_records = []
+        # （卖出日期，收盘价）
+        self.sell_records = []
         
     def restart(self):
         # 恢复默认值
@@ -50,6 +55,8 @@ class KTrainingModel:
         self.total_profit = 0.0
         self.open_profit = 0.0
         self.last_money_left = self.money_left
+        self.buy_records.clear()
+        self.sell_records.clear()
         # 随机挑选一只股票用于之后的k线训练
         self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date = self.random_pick_a_stock()
         # 记录当前的训练日期
@@ -180,11 +187,17 @@ class KTrainingModel:
         # 如果还有股票在手里则强制以最后一天收盘价卖出
         if self.stock_left > 0:
             self.money_left += self.quotes[-1][4] * self.stock_left
+            self.cost_price = None
+            self.stock_left = 0.0
+            self.calculate_profit()
+            self.sell_records.append((self.quotes[-1][0], self.quotes[-1][4]))
+            return True
+        return False
 
     def sell(self, portion):
         # 没有持股，无法卖出
         if self.stock_left <= 0:
-            return
+            return False
         stock_to_sell = self.stock_left * portion
         self.stock_left -= stock_to_sell
         if self.stock_left <= 0:
@@ -193,11 +206,14 @@ class KTrainingModel:
         # 以当日收盘价交易
         self.money_left += self.quotes[self.current_training_index][4] * stock_to_sell
         self.calculate_position()
+        # 记录卖出
+        self.sell_records.append((self.quotes[self.current_training_index][0], self.quotes[self.current_training_index][4]))
+        return True
     
     def buy(self, portion):
         # 钱包没有余额，无法买入
         if self.money_left <= 0:
-            return
+            return False
         money_to_buy = self.money_left * portion
         self.money_left -= money_to_buy
         if self.money_left < 0:
@@ -211,4 +227,12 @@ class KTrainingModel:
             self.cost_price = (money_to_buy + self.cost_price * self.stock_left) / (stock_to_buy + self.stock_left)
         self.stock_left += stock_to_buy
         self.calculate_position()
-        
+        # 记录买入
+        self.buy_records.append((self.quotes[self.current_training_index][0], self.quotes[self.current_training_index][4]))
+        return True
+    
+    def get_buy_records(self):
+        return self.buy_records
+
+    def get_sell_records(self):
+        return self.sell_records

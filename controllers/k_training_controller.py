@@ -103,6 +103,9 @@ class KTrainingController(BaseController):
         self.refresh_m9()
         # 重新绘制训练起始虚线
         self.frame.start_training_vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.start_training_date, color='red', linestyle='--', linewidth=2)
+        # 重新绘制买入、卖出标记
+        self.frame.buy_annotations.clear()
+        self.frame.sell_annotations.clear()
    
     # 移动平均线的绘制函数
     # 根据 checkbox 的状态绘制或隐藏
@@ -149,7 +152,6 @@ class KTrainingController(BaseController):
             # 如果 MA 线已经绘制，则隐藏它们
             for m9_annot in self.frame.magic_nine_annotations:
                 m9_annot.set_visible(False)
-        self.frame.ax.legend()
         self.frame.canvas.draw_idle()
     
     # 训练进入下一个交易日
@@ -166,7 +168,19 @@ class KTrainingController(BaseController):
             self.settle_this_play()
             
     def settle_this_play(self):
-        self.model.k_training_model.settel()
+        res = self.model.k_training_model.settel()
+        if res:
+            # 卖出成功
+            # 绘制卖出记号
+            (last_sell_record_date, last_sell_record_price) = self.model.k_training_model.get_sell_records()[-1]
+            this_sell_annot = self.frame.ax.annotate("", xy=(last_sell_record_date, last_sell_record_price), xytext=(-2,20), textcoords="offset points",
+                                    bbox=dict(boxstyle='round', fc="b"),
+                                    arrowprops=dict(arrowstyle="->")
+                                )
+            this_sell_annot.set_text('S')
+            this_sell_annot.get_bbox_patch().set_alpha(0.4)
+            this_sell_annot.set_visible(True)
+            self.frame.sell_annotations.append(this_sell_annot)
         # 更改控制按钮
         self.frame.trading_frame.next_button.configure(state='disabled')
         self.frame.trading_frame.buy_button.configure(state='disabled')
@@ -185,11 +199,41 @@ class KTrainingController(BaseController):
         self.frame.pocket_frame.candle_left_str.configure(text=self.model.k_training_model.get_kandle_left_str())
 
     def buy(self):
-        self.model.k_training_model.buy(1.0)
+        res = self.model.k_training_model.buy(1.0)
+        if res:
+            # 买入成功
+            # 绘制买入记号
+            (last_buy_record_date, last_buy_record_price) = self.model.k_training_model.get_buy_records()[-1]
+            this_buy_annot = self.frame.ax.annotate("", xy=(last_buy_record_date, last_buy_record_price), xytext=(-2,20), textcoords="offset points",
+                                    bbox=dict(boxstyle='round', fc="r"),
+                                    arrowprops=dict(arrowstyle="->")
+                                )
+            this_buy_annot.set_text('B')
+            this_buy_annot.get_bbox_patch().set_alpha(0.4)
+            this_buy_annot.set_visible(True)
+            self.frame.buy_annotations.append(this_buy_annot)
+        else:
+            # 买入失败
+            return
         self.next_day()
         
     def sell(self):
-        self.model.k_training_model.sell(1.0)
+        res = self.model.k_training_model.sell(1.0)
+        if res:
+            # 卖出成功
+            # 绘制卖出记号
+            (last_sell_record_date, last_sell_record_price) = self.model.k_training_model.get_sell_records()[-1]
+            this_sell_annot = self.frame.ax.annotate("", xy=(last_sell_record_date, last_sell_record_price), xytext=(-2,20), textcoords="offset points",
+                                    bbox=dict(boxstyle='round', fc="b"),
+                                    arrowprops=dict(arrowstyle="->")
+                                )
+            this_sell_annot.set_text('S')
+            this_sell_annot.get_bbox_patch().set_alpha(0.4)
+            this_sell_annot.set_visible(True)
+            self.frame.sell_annotations.append(this_sell_annot)
+        else:
+            # 卖出失败
+            return
         self.next_day()
     
     def start_a_new_play(self):

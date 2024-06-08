@@ -133,4 +133,10 @@ class KTrainingView(CTkFrame):
         
         # 添加训练起始虚线
         self.start_training_vertical_line = None
+
+        # 买入标记
+        self.buy_annotations=[]
+
+        # 卖出标记
+        self.sell_annotations=[]
     
