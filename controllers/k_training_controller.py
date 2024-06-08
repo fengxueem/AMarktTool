@@ -17,6 +17,7 @@ class KTrainingController(BaseController):
         self.frame.trading_frame.refresh_button.configure(state='disabled')
         # 连接鼠标悬浮事件处理函数
         self.frame.canvas.mpl_connect("motion_notify_event", self.hover)
+        self.frame.canvas.mpl_connect('scroll_event', self.zoom_and_pan)
         # 连接checkbox的指标绘制事件
         self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MA).configure(command = self.refresh_ma)
         self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MAGIC_NINE).configure(command = self.refresh_m9)
@@ -80,7 +81,7 @@ class KTrainingController(BaseController):
         self.frame.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         self.frame.ax.grid(True)
         # 这是训练开始时的x轴范围
-        new_xlim = [self.model.k_training_model.start_date, self.model.k_training_model.start_training_date]
+        new_xlim = [mdates.date2num(self.model.k_training_model.start_date), self.model.k_training_model.start_training_date_in_float]
         self.frame.ax.set_xlim(new_xlim)
         # 隐藏刻度标签
         # self.frame.ax.set_xticklabels([])
@@ -102,7 +103,7 @@ class KTrainingController(BaseController):
         self.frame.magic_nine_annotations.clear()
         self.refresh_m9()
         # 重新绘制训练起始虚线
-        self.frame.start_training_vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.start_training_date, color='red', linestyle='--', linewidth=2)
+        self.frame.start_training_vertical_line = self.frame.ax.axvline(x=self.model.k_training_model.start_training_date_in_float, color='red', linestyle='--', linewidth=2)
         # 重新绘制买入、卖出标记
         self.frame.buy_annotations.clear()
         self.frame.sell_annotations.clear()
@@ -123,11 +124,13 @@ class KTrainingController(BaseController):
             else:  # 如果 MA 线已经绘制，则显示它们
                 for ma_line in self.frame.ma_lines:
                     ma_line.set_visible(True)
+            self.frame.ax.legend()
         else:
             # 如果 MA 线已经绘制，则隐藏它们
             for ma_line in self.frame.ma_lines:
                 ma_line.set_visible(False)
-        self.frame.ax.legend()
+            # 隐藏图例
+            self.frame.ax.legend().set_visible(False)
         self.frame.canvas.draw_idle()
 
     # 神奇九转的绘制函数
@@ -160,8 +163,12 @@ class KTrainingController(BaseController):
     def next_day(self):
         self.model.k_training_model.go_to_next_day()
         # 更新图表x轴范围
-        new_xlim = [self.model.k_training_model.start_date, self.model.k_training_model.current_training_date]
+        cur_xlim = self.frame.ax.get_xlim()
+        new_xlim = [cur_xlim[0], self.model.k_training_model.current_training_date_in_float]
         self.frame.ax.set_xlim(new_xlim)
+        # 根据新的x轴范围计算y轴的最大最小值
+        low_min, high_max = self.model.k_training_model.find_price_range(new_xlim[0], new_xlim[1])
+        self.frame.ax.set_ylim([low_min, high_max])
         # 更新新一天的交易信息
         self.update_pocket_frame()
         # 重绘图表
@@ -260,3 +267,73 @@ class KTrainingController(BaseController):
         self.frame.trading_frame.buy_button.configure(state='normal')
         self.frame.trading_frame.sell_button.configure(state='normal')
         self.frame.trading_frame.refresh_button.configure(state='disabled')
+    
+    # 缩放与平移事件处理函数
+    def zoom_and_pan(self, event):
+        base_scale = 1.03
+        start_date_in_float_num = mdates.date2num(self.model.k_training_model.start_date)
+        current_training_date_in_float_num = self.model.k_training_model.current_training_date_in_float
+        if event.button == 'up' or event.button == 'down':
+            if event.key == 'control':
+                # 按下 Ctrl 键则代表放大或缩小
+                cur_xlim = self.frame.ax.get_xlim()
+                cur_xrange = max(1.0, cur_xlim[1] - cur_xlim[0])
+                xdata = event.xdata
+                if event.button == 'up':
+                    scale_factor = 1 / base_scale
+                elif event.button == 'down':
+                    scale_factor = base_scale
+                # 计算移动步长
+                step = cur_xrange * scale_factor / 2
+                # 保证移动后不超过股价日期的上下界限
+                new_low = max(xdata - step, start_date_in_float_num)
+                new_high = min(xdata + step, current_training_date_in_float_num)
+                # 如果缩放到达边界，即某一侧到极限不能再放大或缩小，则另一侧需要弥补放大或缩小的损失。
+                if new_low == start_date_in_float_num:
+                    if event.button == 'up':
+                        new_high = cur_xlim[1] - step
+                    elif event.button == 'down':
+                        new_high = cur_xlim[1] + step
+                    # 同样确保其不超过 quotes 范围
+                    new_high = min(new_high, current_training_date_in_float_num)
+                if new_high == current_training_date_in_float_num:
+                    if event.button == 'up':
+                        new_low = cur_xlim[0] + step
+                    elif event.button == 'down':
+                        new_low = cur_xlim[0] - step
+                    # 同样确保其不超过 quotes 范围
+                    new_low = max(new_low, start_date_in_float_num)
+                # 这是新的x轴范围
+                new_xlim = [new_low, new_high]
+                self.frame.ax.set_xlim(new_xlim)
+
+                # 根据新的x轴范围计算y轴的最大最小值
+                low_min, high_max = self.model.k_training_model.find_price_range(new_xlim[0], new_xlim[1])
+                self.frame.ax.set_ylim([low_min, high_max])
+            else: 
+                # 平移操作
+                cur_xlim = self.frame.ax.get_xlim()
+                # 平移到达左右两边后不能继续平移
+                if event.button == 'up' and cur_xlim[1] == current_training_date_in_float_num:
+                    return
+                if event.button == 'down' and cur_xlim[0] == start_date_in_float_num:
+                    return
+                cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.02)
+                # 计算移动步长
+                if event.button == 'up':
+                    scale_factor = base_scale
+                elif event.button == 'down':
+                    scale_factor = -base_scale
+                step = cur_xrange * scale_factor
+                # 保证平移后不超过股价日期的上下界限
+                new_low = max(cur_xlim[0] + step, start_date_in_float_num)
+                new_high = min(cur_xlim[1] + step, current_training_date_in_float_num)
+                # 这是新的x轴范围
+                new_xlim = [new_low, new_high]
+                self.frame.ax.set_xlim(new_xlim)
+
+                # 根据新的x轴范围计算y轴的最大最小值
+                low_min, high_max = self.model.k_training_model.find_price_range(new_xlim[0], new_xlim[1])
+                self.frame.ax.set_ylim([low_min, high_max])
+                
+            self.frame.canvas.draw_idle()

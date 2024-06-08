@@ -36,9 +36,9 @@ class KTrainingModel:
         # 当前持仓利润比例，每一句开局总是0%
         self.open_profit = 0.0
         # 随机挑选一只股票用于之后的k线训练
-        self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date = self.random_pick_a_stock()
+        self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date_in_float = self.random_pick_a_stock()
         # 记录当前的训练日期
-        self.current_training_date = self.start_training_date
+        self.current_training_date_in_float = self.start_training_date_in_float
         self.current_training_index = -self.kandle_left - 1
         # 记录本局的买入卖出日期
         # （买入日期，收盘价）
@@ -58,9 +58,9 @@ class KTrainingModel:
         self.buy_records.clear()
         self.sell_records.clear()
         # 随机挑选一只股票用于之后的k线训练
-        self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date = self.random_pick_a_stock()
+        self.this_stock_to_play, self.start_date, self.end_date, self.quotes, self.start_training_date_in_float = self.random_pick_a_stock()
         # 记录当前的训练日期
-        self.current_training_date = self.start_training_date
+        self.current_training_date_in_float = self.start_training_date_in_float
         self.current_training_index = -self.kandle_left - 1
 
     # 获取沪深两个市场的股票代码，不包含 ST 垃圾股票
@@ -89,8 +89,8 @@ class KTrainingModel:
             end_date, start_date = self.get_random_time()
             listing_date = pd.to_datetime(this_stock[STOCK_DATA_LISTING_DATE])
         quotes = self.get_stock_quotes(this_stock[STOCK_DATA_CODE], start_date, end_date)
-        start_training_date = quotes[-self.kandle_left - 1][0]
-        return this_stock, start_date, end_date, quotes, start_training_date
+        start_training_date_in_float = quotes[-self.kandle_left - 1][0]
+        return this_stock, start_date, end_date, quotes, start_training_date_in_float
     
     # 使用akshare获取股票数据
     def get_stock_quotes(self, stock_code, start_date, end_date):
@@ -141,7 +141,7 @@ class KTrainingModel:
 
     def go_to_next_day(self):
         self.current_training_index += 1
-        self.current_training_date = self.quotes[self.current_training_index][0]
+        self.current_training_date_in_float = self.quotes[self.current_training_index][0]
         self.kandle_left -= 1
         self.calculate_profit()
         
@@ -239,3 +239,16 @@ class KTrainingModel:
     
     def get_cost_price(self):
         return self.cost_price
+    
+    # 查找指定时间范围内的最大和最小股价
+    def find_price_range(self, start_time, end_time):
+        # 筛选出在指定时间范围内的股价数据
+        visible_quotes = [q for q in self.quotes if start_time <= q[0] <= end_time]
+        # 初始化最高价和最低价
+        high_max = -np.inf
+        low_min = np.inf
+        # 遍历筛选出的数据，更新最高价和最低价
+        for q in visible_quotes:
+            high_max = max(high_max, q[2])
+            low_min = min(low_min, q[3])
+        return low_min, high_max

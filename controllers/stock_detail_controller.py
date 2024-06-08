@@ -68,19 +68,19 @@ class StockDetailController(BaseController):
 
     # 缩放与平移事件处理函数
     def zoom_and_pan(self, event):
-        base_scale = 1.1
+        base_scale = 1.03
         if event.button == 'up' or event.button == 'down':
             if event.key == 'control':
                 # 按下 Ctrl 键则代表放大或缩小
                 cur_xlim = self.frame.ax.get_xlim()
-                cur_xrange = max(1.0, (cur_xlim[1] - cur_xlim[0]) * 0.3)
+                cur_xrange = max(1.0, cur_xlim[1] - cur_xlim[0])
                 xdata = event.xdata
                 if event.button == 'up':
                     scale_factor = 1 / base_scale
                 elif event.button == 'down':
                     scale_factor = base_scale
                 # 计算移动步长
-                step = cur_xrange * scale_factor
+                step = cur_xrange * scale_factor / 2
                 # 保证移动后不超过股价日期的上下界限
                 new_low = max(xdata - step, self.model.quotes[0][0])
                 new_high = min(xdata + step, self.model.quotes[-1][0])
