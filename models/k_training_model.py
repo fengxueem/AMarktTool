@@ -5,13 +5,17 @@ from config import STOCK_DATA_LISTING_DATE
 from config import AK_API_SH_STOCK_NAME, AK_API_SZ_STOCK_NAME, AK_API_STUPID_ST
 from config import AK_API_HIST_DF_DATE, AK_API_HIST_DF_OPEN, AK_API_HIST_DF_CLOSE, AK_API_HIST_DF_HIGH, AK_API_HIST_DF_LOW
 from config import K_TRAINING_MA_LINE_5, K_TRAINING_MA_LINE_10, K_TRAINING_MA_LINE_20
+from config import K_TRAINING_RECORD_FILE_NAME
 
 import akshare as ak
 from datetime import datetime, timedelta
 import random
 import matplotlib.dates as mdates
 import numpy as np
+import os
 import pandas as pd
+import sys
+import yaml
 
 class KTrainingModel:
     
@@ -21,10 +25,6 @@ class KTrainingModel:
         self.all_stocks = self.get_all_stock_no_trash_ST()
         # 剩余的k线根数，每一句开局总是 150
         self.kandle_left = K_TRAINING_DEFAULT_KANDLE_LEFT
-        # 钱包余额，每一句开局总是 10k 或上一局结束的余额
-        self.money_left = K_TRAINING_DEFAULT_MONEY_LEFT
-        # 上一局钱包余额，若还未开局则默认是 10k
-        self.last_money_left = K_TRAINING_DEFAULT_MONEY_LEFT
         # 股份余额，每一句开局总是 0 股
         self.stock_left = 0
         # 成本价，每一句开局总是 None
@@ -45,6 +45,9 @@ class KTrainingModel:
         self.buy_records = []
         # （卖出日期，收盘价）
         self.sell_records = []
+        # 从本地文件中读取历史记录
+        self.record_file_path = self.get_current_python_file_path()
+        self.read_records_from_yaml()
         
     def restart(self):
         # 恢复默认值
@@ -184,15 +187,17 @@ class KTrainingModel:
         return f"{self.total_profit * 100:.1f}%"
     
     def settel(self):
+        res = False
         # 如果还有股票在手里则强制以最后一天收盘价卖出
         if self.stock_left > 0:
             self.money_left += self.quotes[-1][4] * self.stock_left
+            self.sell_records.append((self.quotes[-1][0], self.quotes[-1][4]))
             self.cost_price = None
             self.stock_left = 0.0
             self.calculate_profit()
-            self.sell_records.append((self.quotes[-1][0], self.quotes[-1][4]))
-            return True
-        return False
+            res = True
+        self.save_records_to_yaml()
+        return res
 
     def sell(self, portion):
         # 没有持股，无法卖出
@@ -252,3 +257,40 @@ class KTrainingModel:
             high_max = max(high_max, q[2])
             low_min = min(low_min, q[3])
         return low_min, high_max
+    
+    # 查找当前运行的 Python 文件的路径
+    def get_current_python_file_path(self):
+        # 获取当前模块的完整路径
+        current_file_path = os.path.abspath(sys.argv[0])
+        dir = os.path.dirname(current_file_path)
+        return os.path.join(dir, K_TRAINING_RECORD_FILE_NAME)
+    
+    # 将训练记录保存到 YAML 文件
+    def save_records_to_yaml(self):       
+        # 完整的文件路径
+        filepath = self.record_file_path
+        
+        # 将数据写入 YAML 文件
+        with open(filepath, 'w') as file:
+            yaml.dump(
+                {
+                    'last_money_left': int(self.last_money_left)
+                },
+                file)
+
+    # 从 YAML 文件读取之前的训练记录
+    def read_records_from_yaml(self):
+        # 完整的文件路径
+        filepath = self.record_file_path
+        
+        # 读取 YAML 文件
+        # 钱包余额，money_left，每一局开局总是 10k 或上一局结束的余额
+        # 上一局钱包余额，last_money_left，若还未开局则默认是 10k
+        try:
+            with open(filepath, 'r') as file:
+                data = yaml.safe_load(file)
+            self.last_money_left = data['last_money_left']
+            self.money_left = self.last_money_left
+        except FileNotFoundError:
+            self.money_left = K_TRAINING_DEFAULT_MONEY_LEFT
+            self.last_money_left = K_TRAINING_DEFAULT_MONEY_LEFT

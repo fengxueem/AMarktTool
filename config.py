@@ -87,6 +87,8 @@ K_TRAINING_MA_LINE_5='MA5'
 K_TRAINING_MA_LINE_10='MA10'
 K_TRAINING_MA_LINE_20='MA20'
 
+# records file
+K_TRAINING_RECORD_FILE_NAME='ktr.yaml'
 # ==== akshare API Configs ====
 AK_API_SH_STOCK_NAME='证券简称'
 AK_API_SZ_STOCK_NAME='A股简称'

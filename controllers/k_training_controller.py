@@ -127,10 +127,11 @@ class KTrainingController(BaseController):
             self.frame.ax.legend()
         else:
             # 如果 MA 线已经绘制，则隐藏它们
-            for ma_line in self.frame.ma_lines:
-                ma_line.set_visible(False)
-            # 隐藏图例
-            self.frame.ax.legend().set_visible(False)
+            if len(self.frame.ma_lines) > 0:
+                for ma_line in self.frame.ma_lines:
+                    ma_line.set_visible(False)
+                # 隐藏图例
+                self.frame.ax.legend().set_visible(False)
         self.frame.canvas.draw_idle()
 
     # 神奇九转的绘制函数
