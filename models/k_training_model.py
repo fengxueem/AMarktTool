@@ -195,8 +195,9 @@ class KTrainingModel:
             self.cost_price = None
             self.stock_left = 0.0
             self.calculate_profit()
-            self.last_money_left = self.money_left
             res = True
+        # 保存本局训练结果
+        self.last_money_left = self.money_left
         self.save_records_to_yaml()
         return res
 
@@ -268,11 +269,9 @@ class KTrainingModel:
     
     # 将训练记录保存到 YAML 文件
     def save_records_to_yaml(self):       
-        # 完整的文件路径
-        filepath = self.record_file_path
-        
         # 将数据写入 YAML 文件
-        with open(filepath, 'w') as file:
+        with open(self.record_file_path, 'w') as file:
+            print(f'int(self.last_money_left):{int(self.last_money_left)}')
             yaml.dump(
                 {
                     'last_money_left': int(self.last_money_left)
