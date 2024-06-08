@@ -236,3 +236,6 @@ class KTrainingModel:
 
     def get_sell_records(self):
         return self.sell_records
+    
+    def get_cost_price(self):
+        return self.cost_price

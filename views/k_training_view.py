@@ -140,3 +140,5 @@ class KTrainingView(CTkFrame):
         # 卖出标记
         self.sell_annotations=[]
     
+        # 添加开仓成本线
+        self.open_cost_price_line = None

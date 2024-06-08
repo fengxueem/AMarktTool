@@ -106,6 +106,8 @@ class KTrainingController(BaseController):
         # 重新绘制买入、卖出标记
         self.frame.buy_annotations.clear()
         self.frame.sell_annotations.clear()
+        # 重新绘制开仓成本线
+        self.frame.open_cost_price_line = self.frame.ax.axhline(y=self.model.k_training_model.quotes[0][1], color='orange', linestyle='--', linewidth=2, visible=False)
    
     # 移动平均线的绘制函数
     # 根据 checkbox 的状态绘制或隐藏
@@ -181,6 +183,8 @@ class KTrainingController(BaseController):
             this_sell_annot.get_bbox_patch().set_alpha(0.4)
             this_sell_annot.set_visible(True)
             self.frame.sell_annotations.append(this_sell_annot)
+            # 隐藏成本线
+            self.frame.open_cost_price_line.set_visible(False)
         # 更改控制按钮
         self.frame.trading_frame.next_button.configure(state='disabled')
         self.frame.trading_frame.buy_button.configure(state='disabled')
@@ -212,6 +216,10 @@ class KTrainingController(BaseController):
             this_buy_annot.get_bbox_patch().set_alpha(0.4)
             this_buy_annot.set_visible(True)
             self.frame.buy_annotations.append(this_buy_annot)
+            # 绘制成本线
+            open_cost_price = self.model.k_training_model.get_cost_price()
+            self.frame.open_cost_price_line.set_ydata([open_cost_price, open_cost_price])
+            self.frame.open_cost_price_line.set_visible(True)
         else:
             # 买入失败
             return
@@ -231,6 +239,13 @@ class KTrainingController(BaseController):
             this_sell_annot.get_bbox_patch().set_alpha(0.4)
             this_sell_annot.set_visible(True)
             self.frame.sell_annotations.append(this_sell_annot)
+            # 绘制成本线
+            open_cost_price = self.model.k_training_model.get_cost_price()
+            if open_cost_price is not None:
+                self.frame.open_cost_price_line.set_ydata([open_cost_price, open_cost_price])
+            else:
+                # 若全部卖出，则隐藏成本线
+                self.frame.open_cost_price_line.set_visible(False)
         else:
             # 卖出失败
             return
