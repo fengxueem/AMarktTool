@@ -85,7 +85,7 @@ class KTrainingController(BaseController):
         new_xlim = [mdates.date2num(self.model.k_training_model.start_date), self.model.k_training_model.start_training_date_in_float]
         self.frame.ax.set_xlim(new_xlim)
         # 隐藏刻度标签
-        # self.frame.ax.set_xticklabels([])
+        self.frame.ax.set_xticklabels([])
 
         # 重绘图表
         self.frame.canvas.draw_idle()
