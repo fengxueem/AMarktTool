@@ -195,6 +195,7 @@ class KTrainingModel:
             self.cost_price = None
             self.stock_left = 0.0
             self.calculate_profit()
+            self.last_money_left = self.money_left
             res = True
         self.save_records_to_yaml()
         return res
