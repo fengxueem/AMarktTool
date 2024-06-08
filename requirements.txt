@@ -1,2 +1,6 @@
 customtkinter==5.2.2
 akshare==1.13.90
+matplotlib==3.9.0
+numpy==1.26.4
+pandas==2.2.2
+mplfinance==0.12.10b0

@@ -3,7 +3,6 @@ from .stock_detail_controller import StockDetailController
 from models import Model
 from views import View
 
-
 class StockDetailWindowController(BaseController):
     def __init__(self, view : View, model : Model, key : str) -> None:
         self.key = key
