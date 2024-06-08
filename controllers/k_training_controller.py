@@ -31,7 +31,8 @@ class KTrainingController(BaseController):
         # 下一日：空格键
         view.bind("<Up>", lambda event: self.buy())
         view.bind("<Down>", lambda event: self.sell())
-        view.bind("<space>", lambda event: self.next_day())
+        view.bind("<Right>", lambda event: self.next_day())
+        view.bind("<space>", lambda event: self.start_a_new_play())
         # 窗口开启后默认绘制一次
         self.refresh_figure()
         self.update_pocket_frame()
@@ -162,6 +163,9 @@ class KTrainingController(BaseController):
     
     # 训练进入下一个交易日
     def next_day(self):
+        # 如果当前处于结束状态则函数直接返回
+        if self.model.k_training_model.is_end():
+            return
         self.model.k_training_model.go_to_next_day()
         # 更新图表x轴范围
         cur_xlim = self.frame.ax.get_xlim()
