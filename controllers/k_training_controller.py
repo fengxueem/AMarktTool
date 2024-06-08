@@ -146,11 +146,11 @@ class KTrainingController(BaseController):
                     return
                 for (x, y) in m9_annots:
                     this_annot = self.frame.ax.annotate("", xy=(x, y), xytext=(-2,20), textcoords="offset points",
-                                    bbox=dict(boxstyle='round', fc="r"),
+                                    bbox=dict(boxstyle='round', fc="g"),
                                     arrowprops=dict(arrowstyle="->")
                                 )
                     this_annot.set_text('9')
-                    this_annot.get_bbox_patch().set_alpha(0.4)
+                    this_annot.get_bbox_patch().set_alpha(0.2)
                     self.frame.magic_nine_annotations.append(this_annot)
             else:  # 如果 MA 线已经绘制，则显示它们
                 for m9_annot in self.frame.magic_nine_annotations:
