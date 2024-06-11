@@ -36,7 +36,8 @@ class Controller(Mediator):
             self.model.add_model(STOCK_DETAIL_MODEL, msg)
             self.add_windows_controller(STOCK_DETAIL_CONTROLLER, msg)
         elif event == EVENT_HIDE_STOCK_DETAIL:
-            self.view.hide_window(msg)
+            window_key = msg[0]
+            self.view.hide_window(window_key)
 
     def add_windows_controller(self, type: str, msg) -> None:
         # convert type string to class type

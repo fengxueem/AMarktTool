@@ -1,5 +1,6 @@
 from .__base__ import BaseController
 from .stock_detail_controller import StockDetailController
+from config import EVENT_HIDE_STOCK_DETAIL
 from models import Model
 from views import View
 
@@ -14,4 +15,4 @@ class StockDetailWindowController(BaseController):
         self.stock_detail_controller.mediator = self
     
     def on_closing(self):
-        self.mediator.notify(self, "HIDE_STOCK_DETAIL_WINDOWS", self.key)
+        self.mediator.notify(self, EVENT_HIDE_STOCK_DETAIL, (self.key))
