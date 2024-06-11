@@ -45,8 +45,6 @@ class KTrainingModel:
         self.buy_records = []
         # （卖出日期，收盘价）
         self.sell_records = []
-        # 记录本局投资金额
-        self.money_spent = 0.0
         # 从本地文件中读取历史记录
         self.record_file_path = self.get_current_python_file_path()
         self.read_records_from_yaml()
@@ -59,7 +57,6 @@ class KTrainingModel:
         self.position = 0.0
         self.total_profit = 0.0
         self.open_profit = 0.0
-        self.money_spent = 0.0
         self.last_money_left = self.money_left
         self.buy_records.clear()
         self.sell_records.clear()
@@ -165,10 +162,13 @@ class KTrainingModel:
         return self.kandle_left == 0
     
     def calculate_position(self):
+        # 如果没有成本价，则代表没有持仓，快速返回
         if self.cost_price is None:
             self.position = 0.0
             return
-        self.position = 1.0 * self.money_spent / self.last_money_left
+        # 以当前收盘价计算股票市值与仓位
+        stock = self.quotes[self.current_training_index][4] * self.stock_left
+        self.position = 1.0 * stock / (stock + self.money_left)
         if self.position > 1.0:
             self.position = 1.0
         
@@ -192,7 +192,8 @@ class KTrainingModel:
         res = False
         # 如果还有股票在手里则强制以最后一天收盘价卖出
         if self.stock_left > 0:
-            self.money_left += self.quotes[-1][4] * self.stock_left
+            money_to_get = self.quotes[-1][4] * self.stock_left
+            self.money_left += money_to_get
             self.sell_records.append((self.quotes[-1][0], self.quotes[-1][4]))
             self.cost_price = None
             self.stock_left = 0.0
@@ -215,7 +216,6 @@ class KTrainingModel:
         # 以当日收盘价交易
         money_to_get = self.quotes[self.current_training_index][4] * stock_to_sell
         self.money_left += money_to_get
-        self.money_spent -= money_to_get
         self.calculate_position()
         # 记录卖出
         self.sell_records.append((self.quotes[self.current_training_index][0], self.quotes[self.current_training_index][4]))
@@ -226,7 +226,6 @@ class KTrainingModel:
         if self.money_left <= 0:
             return False
         money_to_buy = self.money_left * portion
-        self.money_spent += money_to_buy
         self.money_left -= money_to_buy
         if self.money_left < 0:
             self.money_left = 0.0
