@@ -190,18 +190,20 @@ class StockDetailController(BaseController):
             else:  # 如果 MA 线已经绘制，则显示它们
                 for ma_line in self.frame.ma_lines:
                     ma_line.set_visible(True)
+            self.frame.ax.legend()
         else:
             # 如果 MA 线已经绘制，则隐藏它们
             for ma_line in self.frame.ma_lines:
                 ma_line.set_visible(False)
-        self.frame.ax.legend()
+                # 隐藏图例
+                self.frame.ax.legend().set_visible(False)
         self.frame.canvas.draw_idle()
 
     # 神奇九转的绘制函数
     # 根据 checkbox 的状态绘制或隐藏
     def refresh_m9(self):
         if self.frame.stock_indicator_frame.get_checkbox_by_text(text=STOCK_INDICATOR_MAGIC_NINE).get():
-            # 如果 MA 线还未绘制，则绘制它们
+            # 如果 M9 还未绘制，则绘制它们
             if len(self.frame.magic_nine_annotations) == 0:
                 m9_annots = self.model.get_M9s()
                 if m9_annots is None:
@@ -214,12 +216,11 @@ class StockDetailController(BaseController):
                     this_annot.set_text('9')
                     this_annot.get_bbox_patch().set_alpha(0.4)
                     self.frame.magic_nine_annotations.append(this_annot)
-            else:  # 如果 MA 线已经绘制，则显示它们
+            else:  # 如果 M9 已经绘制，则显示它们
                 for m9_annot in self.frame.magic_nine_annotations:
                     m9_annot.set_visible(True)
         else:
-            # 如果 MA 线已经绘制，则隐藏它们
+            # 如果 M9 已经绘制，则隐藏它们
             for m9_annot in self.frame.magic_nine_annotations:
                 m9_annot.set_visible(False)
-        self.frame.ax.legend()
         self.frame.canvas.draw_idle()
