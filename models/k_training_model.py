@@ -45,6 +45,8 @@ class KTrainingModel:
         self.buy_records = []
         # （卖出日期，收盘价）
         self.sell_records = []
+        # 记录本局投资金额
+        self.money_spent = 0.0
         # 从本地文件中读取历史记录
         self.record_file_path = self.get_current_python_file_path()
         self.read_records_from_yaml()
@@ -57,6 +59,7 @@ class KTrainingModel:
         self.position = 0.0
         self.total_profit = 0.0
         self.open_profit = 0.0
+        self.money_spent = 0.0
         self.last_money_left = self.money_left
         self.buy_records.clear()
         self.sell_records.clear()
@@ -165,8 +168,7 @@ class KTrainingModel:
         if self.cost_price is None:
             self.position = 0.0
             return
-        stock = self.cost_price * self.stock_left
-        self.position = 1.0 * stock / (stock + self.money_left)
+        self.position = 1.0 * self.money_spent / self.last_money_left
         if self.position > 1.0:
             self.position = 1.0
         
@@ -211,7 +213,9 @@ class KTrainingModel:
             self.cost_price = None
             self.stock_left = 0.0
         # 以当日收盘价交易
-        self.money_left += self.quotes[self.current_training_index][4] * stock_to_sell
+        money_to_get = self.quotes[self.current_training_index][4] * stock_to_sell
+        self.money_left += money_to_get
+        self.money_spent -= money_to_get
         self.calculate_position()
         # 记录卖出
         self.sell_records.append((self.quotes[self.current_training_index][0], self.quotes[self.current_training_index][4]))
@@ -222,6 +226,7 @@ class KTrainingModel:
         if self.money_left <= 0:
             return False
         money_to_buy = self.money_left * portion
+        self.money_spent += money_to_buy
         self.money_left -= money_to_buy
         if self.money_left < 0:
             self.money_left = 0.0
