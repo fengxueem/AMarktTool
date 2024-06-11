@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 
 class StockDetailModel:
-    def __init__(self, key : str) -> None:
+    def __init__(self, key : str, name: str) -> None:
         self.key = key
         self.stock_code = self._extract_stock_code()
-        self.stock_name = self._get_stock_name()
+        self.stock_name = name
         # quotes 记录每一个交易日的股票数据，其中数据存放顺序如下
         # '日期', '开盘', '最高', '最低', '收盘'
         self.quotes = []
@@ -15,18 +15,6 @@ class StockDetailModel:
     # 从 key 中提取股票代码
     def _extract_stock_code(self):
         return self.key[-6:]
-    
-    # 从 stock_code 中提取股票名称
-    def _get_stock_name(self):
-        stock_name = None
-        # 上海股票代码以'6'开头
-        if self.stock_code.startswith('6'):
-            stock_info_df = ak.stock_info_sh_name_code()
-            stock_name = stock_info_df.loc[stock_info_df['证券代码'] == self.stock_code, '证券简称'].values[0]
-        else:
-            stock_info_df = ak.stock_info_sz_name_code()
-            stock_name = stock_info_df.loc[stock_info_df['A股代码'] == self.stock_code, 'A股简称'].values[0]
-        return stock_name
     
     def get_stock_code(self) -> str: 
         return self.stock_code

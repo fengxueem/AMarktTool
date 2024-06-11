@@ -30,7 +30,7 @@ class Controller(Mediator):
         self.view.switch_frame(WELCOME_FRAME)
         self.view.start_mainloop()
     
-    def notify(self, sender: object, event: str, msg: str) -> None:
+    def notify(self, sender: object, event: str, *msg) -> None:
         if sender is self.magic_nine_controller and event == EVENT_OPEN_STOCK_DETAIL:
             self.view.add_window(STOCK_DETAIL_WINDOW, msg)
             self.model.add_model(STOCK_DETAIL_MODEL, msg)
@@ -38,14 +38,15 @@ class Controller(Mediator):
         elif event == EVENT_HIDE_STOCK_DETAIL:
             self.view.hide_window(msg)
 
-    def add_windows_controller(self, type: str, name: str) -> None:
+    def add_windows_controller(self, type: str, msg) -> None:
         # convert type string to class type
         WindowControllerClass = None
         if type == STOCK_DETAIL_CONTROLLER:
             WindowControllerClass = StockDetailWindowController
-            
-        key = type + name
-        if key not in self.window_controllers:       
+        
+        key, _ = msg[0]
+        controller_key = type + key
+        if controller_key not in self.window_controllers:       
             # create a controller instance if not existed
-            self.window_controllers[key] = WindowControllerClass(self.view, self.model, key)
-            self.window_controllers[key].mediator = self
+            self.window_controllers[controller_key] = WindowControllerClass(self.view, self.model, controller_key)
+            self.window_controllers[controller_key].mediator = self

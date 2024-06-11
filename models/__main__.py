@@ -10,13 +10,14 @@ class Model:
         self.magic_nine_model = MagicNineModel()
         self.k_training_model = KTrainingModel()
         
-    def add_model(self, model_type: str, name: str) -> None:
+    def add_model(self, model_type: str, msg) -> None:
+        key, name = msg[0]
         # convert type string to a real class
         ModelClazz = None
         if model_type == STOCK_DETAIL_WINDOW:
             ModelClazz = StockDetailModel
         
-        model_key = model_type + name
+        model_key = model_type + key
         if model_key not in self.models:
             # create a Window instance if not existed
-            self.models[model_key] = ModelClazz(model_key)
+            self.models[model_key] = ModelClazz(model_key, name)

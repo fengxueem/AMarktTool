@@ -50,20 +50,21 @@ class View(customtkinter.CTk):
         # add 
         self.frames[name].grid(row=1, column=0, sticky="nsew")
 
-    def add_window(self, window_type: str, name: str) -> None:
+    def add_window(self, window_type: str, msg) -> None:
+        key, _ = msg[0]
         # convert type string to a real class
         WindowClazz = None
         if window_type == STOCK_DETAIL_WINDOW:
             WindowClazz = StockDetailWindow
         
-        windows_key = window_type + name
-        if windows_key in self.windows:
+        window_key = window_type + key
+        if window_key in self.windows:
             # focus a Window if already existed
-            self.windows[windows_key].deiconify()
-            self.windows[windows_key].focus()
+            self.windows[window_key].deiconify()
+            self.windows[window_key].focus()
         else:
             # create a Window instance if not existed
-            self.windows[windows_key] = WindowClazz(self)
+            self.windows[window_key] = WindowClazz(self)
     
     def hide_window(self, key: str) -> None:
         if key in self.windows:
